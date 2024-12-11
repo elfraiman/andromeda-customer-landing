@@ -1,0 +1,32 @@
+@import "../globalStyles/index.scss";
+
+.formInput {
+    border-radius: 20px;
+    background-color: #f3f4f7;
+
+    fieldset {
+        border: none;
+        padding: 5px 10px;
+    }
+    input {
+        border-radius: 20px;
+        background-color: #f3f4f7 !important;
+        padding: 15px 5px;
+    }
+}
+
+.loginBtn {
+    border: none;
+    border-radius: 20px;
+    background: $blueColor;
+    margin: 10px 0 0 0;
+    color: white;
+    height: 50px;
+    font-size: 24px;
+    width: 100%;
+    margin-top: 26px;
+
+    &:hover {
+        background: $greenTidar;
+    }
+}

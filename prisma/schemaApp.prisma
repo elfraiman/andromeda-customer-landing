@@ -1,0 +1,536 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/app"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model CompaniesConfig {
+  CompanyConfigId        Int       @id(map: "PK__Companie__4946F4EA9B60F78E") @default(autoincrement())
+  CompanyIdGeneralCRM    String    @db.NVarChar(36)
+  CreatedAt              DateTime? @default(now(), map: "DF__Companies__Creat__0504B816") @db.DateTime
+  PropertyEngName        String    @db.NVarChar(25)
+  PropertyValue          Float?
+  PropertyTextJsonValue  String?   @db.NVarChar(Max)
+  PropertyHebDescription String    @db.NVarChar(Max)
+
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM_CompaniesConfig")
+}
+
+model CompanyAdmin {
+  CompanyAdminId   String    @id(map: "PK_CompanyAdmin") @default("newid()", map: "DF__CompanyAd__Compa__6BE40491") @db.NVarChar(36)
+  CompanyID        String    @unique(map: "UQ__CompanyA__2D971C4D294743C1") @db.NVarChar(36)
+  CreatedAt        DateTime? @default(now(), map: "DF__CompanyAd__Creat__6CD828CA") @db.DateTime
+  NotShowFields    String?   @db.NVarChar(Max)
+  MaxSearchResults Int?
+  EditFields       String?   @db.NVarChar(Max)
+
+  @@index([CompanyID], map: "IX_CompanyIdGeneralCRM_CompanyAdmin")
+}
+
+model EmployeeHours {
+  EmployeeHoursId                 String                  @id(map: "PK_EmployeeHours") @default("newid()", map: "DF__EmployeeH__Emplo__16CE6296") @db.NVarChar(36)
+  CreatedAt                       DateTime?               @default(now(), map: "DF__EmployeeH__Creat__17C286CF") @db.DateTime
+  CompanyIdGeneralCRM             String                  @db.NVarChar(36)
+  EmployeeId                      Int
+  EmployeeNumber                  Int
+  MonthManaged                    Int
+  YearManaged                     Int
+  LeadingDate                     DateTime                @db.Date
+  HourStart                       DateTime?               @db.Time
+  HourEnd                         DateTime?               @db.Time
+  HourStartSource                 DateTime?               @db.Time
+  HourEndSource                   DateTime?               @db.Time
+  RealHours                       Float?
+  QtyHour                         Float?
+  QtyHour125                      Float?
+  QtyHour150                      Float?
+  QtyHour175                      Float?
+  QtyHour200                      Float?
+  BreakMinutes                    Float?
+  GpsStart                        String?                 @db.NVarChar(100)
+  GpsEnd                          String?                 @db.NVarChar(100)
+  EmployeeHoursByLocalityId       String                  @db.NVarChar(36)
+  IsManualInsert                  Int?                    @db.TinyInt
+  ManualInsertUserId              String?                 @db.NVarChar(36)
+  IsRowDeleted                    Int?                    @db.TinyInt
+  ActionTypeID                    Int?                    @default(1, map: "DF_ActionTypeID")
+  DayTypeID                       Int?
+  HolidayName                     String?                 @db.NChar(20)
+  StartEndTimeSabat               DateTime?               @db.DateTime
+  IsForemanHourApproved           DateTime?               @db.DateTime
+  IsForemanApproval               DateTime?               @db.DateTime
+  ForemanApprovalGeneralCRMUserId String?                 @db.NVarChar(36)
+  IsComplementRow                 Int?                    @db.TinyInt
+  Lkup_ActionType                 Lkup_ActionType?        @relation(fields: [ActionTypeID], references: [ActionTypeID], onDelete: NoAction, onUpdate: NoAction, map: "C_ActionTypeID")
+  EmployeeHoursByLocality         EmployeeHoursByLocality @relation(fields: [EmployeeHoursByLocalityId], references: [EmployeeHoursByLocalityId], onUpdate: NoAction, map: "EmployeeHoursByLocalityId")
+
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM_EmployeeHours")
+  @@index([EmployeeHoursId], map: "IX_EmployeeHours")
+  @@index([EmployeeNumber], map: "IX_EmployeeNumber_EmployeeHours")
+  @@index([ForemanApprovalGeneralCRMUserId], map: "IX_ForemanApprovalGeneralCRMUserId_EmployeeHours")
+  @@index([IsComplementRow], map: "IX_IsComplementRow_EmployeeHours")
+  @@index([IsForemanApproval], map: "IX_IsForemanApproval_EmployeeHours")
+  @@index([IsManualInsert], map: "IX_IsManualInsert_EmployeeHours")
+  @@index([IsRowDeleted], map: "IX_IsRowDeleted_EmployeeHours")
+  @@index([LeadingDate], map: "IX_LeadingDate_EmployeeHours")
+  @@index([ManualInsertUserId], map: "IX_ManualInsertUserId_EmployeeHours")
+  @@index([MonthManaged], map: "IX_MonthManaged_EmployeeHours")
+  @@index([YearManaged], map: "IX_YearManaged_EmployeeHours")
+}
+
+model EmployeeHoursByLocality {
+  EmployeeHoursByLocalityId String                  @id(map: "PK_EmployeeHoursByLocalityId") @default("newid()", map: "DF__EmployeeH__Emplo__4865BE2A") @db.NVarChar(36)
+  CreatedAt                 DateTime?               @default(now(), map: "DF__EmployeeH__Creat__4959E263") @db.DateTime
+  CompanyIdGeneralCRM       String                  @db.NVarChar(36)
+  EmployeeId                Int
+  NotShowEmployeeHours      Int?                    @db.TinyInt
+  EmployeeHoursLocalityId   String                  @db.NVarChar(36)
+  HourMinStart              DateTime?               @db.Time
+  HourMaxStop               DateTime?               @db.Time
+  RoundTime                 String?                 @db.NVarChar(Max)
+  EmployeeHoursUserId       String                  @db.NVarChar(36)
+  MinimumHours2BreakTime    Float                   @default(7, map: "DF_MinHours")
+  BreakTime                 Int?                    @default(30, map: "DF_BreakTime")
+  AlertForMaxMonthHours     Float?
+  EmployeeHoursContractId   String                  @db.NVarChar(36)
+  EmployeeHours             EmployeeHours[]
+  EmployeeHoursUsers        EmployeeHoursUsers      @relation(fields: [EmployeeHoursUserId], references: [EmployeeHoursUsersId], onUpdate: NoAction, map: "Const_EmployeeHoursUserId")
+  EmployeeHoursContracts    EmployeeHoursContracts  @relation(fields: [EmployeeHoursContractId], references: [EmployeeHoursContractsId], onUpdate: NoAction, map: "EmployeeHoursContractId")
+  EmployeeHoursLocalities   EmployeeHoursLocalities @relation(fields: [EmployeeHoursLocalityId], references: [EmployeeHoursLocalityId], onUpdate: NoAction, map: "pk_EmployeeHoursLocality")
+
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM_EmployeeHoursByLocality")
+  @@index([EmployeeHoursByLocalityId], map: "IX_EmployeeHoursByLocality")
+  @@index([EmployeeHoursContractId], map: "IX_EmployeeHoursContractId_EmployeeHoursByLocality")
+  @@index([EmployeeHoursLocalityId], map: "IX_EmployeeHoursLocalityId_EmployeeHoursByLocality")
+  @@index([EmployeeHoursUserId], map: "IX_EmployeeHoursUserId_EmployeeHoursByLocality")
+  @@index([EmployeeId], map: "IX_EmployeeId_EmployeeHoursByLocality")
+}
+
+model EmployeeHoursByLocalityTotals {
+  EmployeeHoursByLocalityTotalsId         String                                    @id(map: "PK_EmployeeHoursByLocalityTotalsId") @default("newid()", map: "DF__EmployeeH__Emplo__1DD065E0") @db.NVarChar(36)
+  CreatedAt                               DateTime?                                 @default(now(), map: "DF__EmployeeH__Creat__1EC48A19") @db.DateTime
+  CompanyIdGeneralCRM                     String                                    @db.NVarChar(36)
+  MonthManaged                            Int
+  YearManaged                             Int
+  EmployeeId                              Int
+  EmployeeHoursLocalityId                 String                                    @db.NVarChar(36)
+  QtyHour                                 Float?
+  QtyHour125                              Float?
+  QtyHour150                              Float?
+  QtyHour175                              Float?
+  QtyHour200                              Float?
+  RealHours                               Float?
+  BreakMinutes                            Float?
+  WorkedDays                              Int?
+  IsCloseSalary                           Int                                       @default(0, map: "DF_EmployeeHoursByLocalityTotals_IsPaySlipClosed")
+  EmployeeHoursLocalities                 EmployeeHoursLocalities                   @relation(fields: [EmployeeHoursLocalityId], references: [EmployeeHoursLocalityId], onUpdate: NoAction, map: "PK_Totals_EmployeeHoursLocalityId")
+  EmployeeHoursByLocalityTotalsActionType EmployeeHoursByLocalityTotalsActionType[]
+
+  @@index([EmployeeHoursLocalityId], map: "IX_EmployeeHoursLocalityId_EmployeeHoursByLocalityTotals")
+  @@index([EmployeeId], map: "IX_EmployeeId_EmployeeHoursByLocalityTotals")
+  @@index([IsCloseSalary], map: "IX_IsCloseSalary_EmployeeHoursByLocalityTotals")
+  @@index([MonthManaged], map: "IX_MonthManaged_EmployeeHoursByLocalityTotals")
+  @@index([YearManaged], map: "IX_YearManaged_EmployeeHoursByLocalityTotals")
+}
+
+model EmployeeHoursByLocalityTotalsActionType {
+  EmployeeHoursByLocalityTotalsActionTypeId String                        @id(map: "PK_EmployeeHoursByLocalityTotalsActionTypeId") @default("newid()", map: "DF__EmployeeH__Emplo__22951AFD") @db.NVarChar(36)
+  CreatedAt                                 DateTime?                     @default(now(), map: "DF__EmployeeH__Creat__23893F36") @db.DateTime
+  EmployeeHoursByLocalityTotalsId           String                        @db.NVarChar(36)
+  ActionTypeId                              Int
+  TotalActionType                           Float
+  Lkup_ActionType                           Lkup_ActionType               @relation(fields: [ActionTypeId], references: [ActionTypeID], onUpdate: NoAction, map: "PK_ActionTypeId")
+  EmployeeHoursByLocalityTotals             EmployeeHoursByLocalityTotals @relation(fields: [EmployeeHoursByLocalityTotalsId], references: [EmployeeHoursByLocalityTotalsId], onUpdate: NoAction, map: "PK_EmployeeHoursByLocalityTotalsId2")
+
+  @@index([ActionTypeId], map: "IX_ActionTypeId _EmployeeHoursByLocalityTotalsActionType")
+  @@index([EmployeeHoursByLocalityTotalsActionTypeId], map: "IX_EmployeeHoursByLocalityTotalsActionTypeId _EmployeeHoursByLocalityTotalsActionType")
+  @@index([EmployeeHoursByLocalityTotalsId], map: "IX_EmployeeHoursByLocalityTotalsId _EmployeeHoursByLocalityTotalsActionType")
+}
+
+model EmployeeHoursCompaniesSmsAlert {
+  CompaniesSmsAlertId Int       @id(map: "PK__Employee__FF1CCF5E219BF2E2") @default(autoincrement())
+  CompanyIdGeneralCRM String    @db.NVarChar(36)
+  CreatedAt           DateTime? @default(now(), map: "DF__EmployeeH__Creat__0D99FE17") @db.DateTime
+  EmployeeID          Int?
+  SmsNumber           String    @db.NVarChar(10)
+  SmsResponse         String?   @db.NVarChar(Max)
+  UserSend            String    @db.NVarChar(36)
+
+  @@index([CompaniesSmsAlertId], map: "IX_CompaniesSmsAlertId _EmployeeHoursCompaniesSmsAlert")
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM _EmployeeHoursCompaniesSmsAlert")
+  @@index([EmployeeID], map: "IX_EmployeeID _EmployeeHoursCompaniesSmsAlert")
+}
+
+model EmployeeHoursContracts {
+  EmployeeHoursContractsId String                    @id(map: "PK_EmployeeHoursContracts") @default("newid()", map: "DF__EmployeeH__Emplo__2C538F61") @db.NVarChar(36)
+  CreatedAt                DateTime?                 @default(now(), map: "DF__EmployeeH__Creat__2D47B39A") @db.DateTime
+  Active                   Int                       @db.TinyInt
+  HebrewName               String                    @db.NVarChar(250)
+  Comments                 String?                   @db.NVarChar(Max)
+  JsonData                 String                    @db.NVarChar(Max)
+  CompanyIdGeneralCRM      String?                   @db.NVarChar(36)
+  HoursWeek                Float
+  NumberDayInWeek          Int                       @db.TinyInt
+  IsExtraHoursWeekCalc     Int?                      @db.TinyInt
+  IsNightShiftCalc         Int?                      @db.TinyInt
+  EmployeeHoursByLocality  EmployeeHoursByLocality[]
+
+  @@index([Active], map: "IX_Active _EmployeeHoursContracts")
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM _EmployeeHoursContracts")
+  @@index([IsExtraHoursWeekCalc], map: "IX_IsExtraHoursWeekCalc _EmployeeHoursContracts")
+}
+
+model EmployeeHoursForemansConfig {
+  EmployeeHoursForemanConfigId String    @id(map: "PK_EmployeeHoursForemansConfigId") @default("newid()", map: "DF__EmployeeH__Emplo__000AF8CF") @db.NVarChar(36)
+  CreatedAt                    DateTime? @default(now(), map: "DF__EmployeeH__Creat__00FF1D08") @db.DateTime
+  CompanyIdGeneralCRM          String    @db.NVarChar(36)
+  ForemanUserGeneralCRM        String    @unique(map: "AK_ForemanUserGeneralCRM") @db.NVarChar(36)
+  CanEdit                      Int?      @db.TinyInt
+  NotShowSourceHours           Int?      @db.TinyInt
+}
+
+model EmployeeHoursLocalities {
+  EmployeeHoursLocalityId       String                          @id(map: "PK_EmployeeHoursLocalityId") @default("newid()", map: "DF__EmployeeH__Emplo__40C49C62") @db.NVarChar(36)
+  CreatedAt                     DateTime?                       @default(now(), map: "DF__EmployeeH__Creat__41B8C09B") @db.DateTime
+  NotShowLocality               Int?                            @db.TinyInt
+  LocalityName                  String                          @db.NVarChar(100)
+  LocalityNameEng               String?                         @db.NVarChar(100)
+  CompanyIdGeneralCRM           String                          @db.NVarChar(36)
+  Address                       String?                         @db.NVarChar(100)
+  Gps                           String?                         @db.NVarChar(100)
+  GpsRadius                     Int
+  AddressAccess                 String?                         @db.NVarChar(50)
+  LocalityIDAccess              Int
+  LocalityCodeAccess            Int?
+  CustomerIDAccess              Int?
+  CustomerNameAccess            String?                         @db.NVarChar(100)
+  ForemanGeneralCRMUserId       String?                         @db.NVarChar(36)
+  HourMinStart                  DateTime?                       @db.Time
+  HourMaxStop                   DateTime?                       @db.Time
+  RoundTime                     String?                         @db.NVarChar(Max)
+  MinimumHours2BreakTime        Float?
+  BreakTime                     Int?
+  AlertForMaxMonthHours         Float?
+  RestrictDayHoursAbove12       Int?                            @db.TinyInt
+  RestrictWeekExtraHoursAbove16 Int?                            @db.TinyInt
+  RestrictGpsActive             Int?                            @db.TinyInt
+  EmployeeHoursByLocality       EmployeeHoursByLocality[]
+  EmployeeHoursByLocalityTotals EmployeeHoursByLocalityTotals[]
+
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM_EmployeeHoursLocalities")
+  @@index([EmployeeHoursLocalityId], map: "IX_EmployeeHoursLocalityId _EmployeeHoursLocalities")
+  @@index([ForemanGeneralCRMUserId], map: "IX_ForemanGeneralCRMUserId_EmployeeHoursLocalities")
+  @@index([LocalityCodeAccess], map: "IX_LocalityCodeAccess _EmployeeHoursLocalities")
+  @@index([LocalityCodeAccess], map: "IX_LocalityCodeAccess_EmployeeHoursLocalities")
+  @@index([LocalityIDAccess], map: "IX_LocalityIDAccess_EmployeeHoursLocalities")
+}
+
+model EmployeeHoursUsers {
+  EmployeeHoursUsersId    String                    @id(map: "PK_EmployeeHoursUsers") @db.NVarChar(36)
+  CreatedAt               DateTime?                 @default(now(), map: "DF__EmployeeH__Creat__2116E6DF") @db.DateTime
+  CompanyIdGeneralCRM     String                    @db.NVarChar(36)
+  EmployeeId              Int
+  MobileNumber            String?                   @db.NVarChar(11)
+  UserName                String                    @unique(map: "UK_UserName") @db.NVarChar(20)
+  Password                String                    @db.NVarChar(20)
+  IsAdmin                 Int                       @default(0, map: "DF__EmployeeH__IsAdm__220B0B18") @db.TinyInt
+  LastEntry               DateTime?                 @db.DateTime
+  IsAllowAccess2WebSite   Int                       @default(1, map: "DF__EmployeeH__IsAll__22FF2F51") @db.TinyInt
+  PhoneData               String?                   @db.NVarChar(Max)
+  CookieError             DateTime?                 @db.DateTime
+  EmployeeHoursByLocality EmployeeHoursByLocality[]
+
+  @@index([CompanyIdGeneralCRM], map: "IX_CompanyIdGeneralCRM _EmployeeHoursUsers")
+  @@index([EmployeeId], map: "IX_EmployeeId _EmployeeHoursUsers")
+  @@index([IsAdmin], map: "IX_IsAdmin _EmployeeHoursUsers")
+  @@index([IsAllowAccess2WebSite], map: "IX_IsAllowAccess2WebSite _EmployeeHoursUsers")
+  @@index([MobileNumber], map: "IX_MobileNumber _EmployeeHoursUsers")
+}
+
+model EmployeesAccessDocumentsTemp {
+  EmployeesAccessDocumentTempId String   @id(map: "PK_EmployeesAccessDocumentTempId") @default("newid()", map: "DF__Employees__Emplo__473C8FC7") @db.NVarChar(36)
+  CompanyGeneralCrmId           String   @db.NVarChar(36)
+  CreatedAt                     DateTime @default(now(), map: "DF__Employees__Creat__4830B400") @db.DateTime
+  EmployeeID                    String?  @db.NVarChar(50)
+  DocumemtID                    String?  @db.NVarChar(50)
+  Date                          String?  @db.NVarChar(50)
+  DocumemtType                  String?  @db.NVarChar(50)
+  Comment                       String?  @db.NVarChar(Max)
+  DocumentName                  String?  @db.NVarChar(250)
+
+  @@index([CompanyGeneralCrmId], map: "IX_CompanyGeneralCrmId_EmployeesAccessDocumentsTemp")
+  @@index([DocumemtID], map: "IX_DocumemtID _EmployeesAccessDocumentsTemp")
+  @@index([DocumemtType], map: "IX_DocumemtType_EmployeesAccessDocumentsTemp")
+  @@index([EmployeeID], map: "IX_EmployeeID _EmployeesAccessDocumentsTemp")
+  @@index([EmployeesAccessDocumentTempId], map: "IX_EmployeesAccessDocumentTempId_EmployeesAccessDocumentsTemp")
+}
+
+model EmployeesAccessHouseTemp {
+  EmployeesAccessHouseTempId String   @id(map: "PK_EmployeesAccessHouseTempId") @default("newid()", map: "DF__Employees__Emplo__6225902D") @db.NVarChar(36)
+  CompanyGeneralCrmId        String   @db.NVarChar(36)
+  CreatedAt                  DateTime @default(now(), map: "DF__Employees__Creat__6319B466") @db.DateTime
+  HouseID                    String?  @db.NVarChar(50)
+  HouseCode                  String?  @db.NVarChar(50)
+  CityName                   String?  @db.NVarChar(50)
+  Street                     String?  @db.NVarChar(100)
+  HouseNumber                String?  @db.NVarChar(50)
+  ZipCode                    String?  @db.NVarChar(50)
+  EmployeesQtyMax            String?  @db.NVarChar(50)
+  ElectricityCounter_Start   String?  @db.NVarChar(50)
+  ElectricityCounter_End     String?  @db.NVarChar(50)
+  GasCounter_Start           String?  @db.NVarChar(50)
+  GasCounter_End             String?  @db.NVarChar(50)
+  WaterCounter_Start         String?  @db.NVarChar(50)
+  WaterCounter_End           String?  @db.NVarChar(50)
+  ElectricityNumber          String?  @db.NVarChar(50)
+  GasNumber                  String?  @db.NVarChar(50)
+  WaterNumber                String?  @db.NVarChar(50)
+  HouseField                 String?  @db.NVarChar(50)
+  ArnonaNumber               String?  @db.NVarChar(50)
+  EvacuationDate             String?  @db.NVarChar(50)
+  AreaMan                    String?  @db.NVarChar(50)
+  GasContainer               String?  @db.NVarChar(50)
+  GasCompanyID               String?  @db.NVarChar(50)
+  SleepingRooms              String?  @db.NVarChar(50)
+  Salon                      String?  @db.NVarChar(50)
+  Toilet                     String?  @db.NVarChar(50)
+  Baths                      String?  @db.NVarChar(50)
+  HouseCommittee             String?  @db.NVarChar(50)
+  HouseCommitteePhone        String?  @db.NVarChar(50)
+  Status                     String?  @db.NVarChar(50)
+  Name                       String?  @db.NVarChar(50)
+  Street_                    String?  @db.NVarChar(50)
+  CityName_                  String?  @db.NVarChar(50)
+  ZipCode_                   String?  @db.NVarChar(50)
+  Phone_1                    String?  @map("Phone#1") @db.NVarChar(50)
+  Phone_2                    String?  @map("Phone#2") @db.NVarChar(50)
+  FaxNumber                  String?  @db.NVarChar(50)
+  StartDateContract          String?  @db.NVarChar(50)
+  EndDateContract            String?  @db.NVarChar(50)
+  Security                   String?  @db.NVarChar(50)
+  SecurityAmount             String?  @db.NVarChar(50)
+  PaymentFrequency           String?  @db.NVarChar(50)
+  Rant                       String?  @db.NVarChar(50)
+  Comment                    String?  @db.NVarChar(Max)
+  IsInsured                  String?  @db.NVarChar(50)
+  InsureEndDate              String?  @db.NVarChar(50)
+  IsUpdate                   String?  @db.NVarChar(50)
+  LivingArea                 String?  @db.NVarChar(50)
+  HouseRelation              String?  @db.NVarChar(50)
+  CableTypeID                String?  @db.NVarChar(50)
+  CableInstallationdate      String?  @db.NVarChar(50)
+  AccountNumber              String?  @db.NVarChar(50)
+  PathNumber                 String?  @db.NVarChar(50)
+  AppartmentNum              String?  @db.NVarChar(50)
+  IsBroker                   String?  @db.NVarChar(50)
+  BrokerName                 String?  @db.NVarChar(50)
+  BrokerPhone                String?  @db.NVarChar(50)
+  ElectricityCode            String?  @db.NVarChar(50)
+  GasNumberCode              String?  @db.NVarChar(50)
+  WaterNumberCode            String?  @db.NVarChar(50)
+  ElectricityComment         String?  @db.NVarChar(50)
+  GasCounteComment           String?  @db.NVarChar(50)
+  WaterCounterComment        String?  @db.NVarChar(50)
+  AgencyFee                  String?  @db.NVarChar(50)
+  IdNumber                   String?  @db.NVarChar(50)
+  ArrivalInstructions        String?  @db.NVarChar(50)
+  OwnerEmail                 String?  @db.NVarChar(50)
+  OwnerBankAcount            String?  @db.NVarChar(50)
+  CustomerID                 String?  @db.NVarChar(50)
+  LocalityName               String?  @db.NVarChar(50)
+  Contractor_billing         String?  @db.NVarChar(50)
+  Floor                      String?  @db.NVarChar(50)
+  Entrance                   String?  @db.NVarChar(50)
+  OwnerBranchCode            String?  @db.NVarChar(50)
+  OwnerBankID                String?  @db.NVarChar(50)
+
+  @@index([CompanyGeneralCrmId], map: "IX_CompanyGeneralCrmId_EmployeesAccessHouseTemp")
+  @@index([CustomerID], map: "IX_CustomerID_EmployeesAccessHouseTemp")
+  @@index([HouseID], map: "IX_HouseID_EmployeesAccessHouseTemp")
+}
+
+model EmployeesAccessLkupDocumentTypeTemp {
+  EmployeesAccessLkupDocumentTypeTempId String   @id(map: "PK_EmployeesAccessLkupDocumentTypeTempId") @default("newid()", map: "DF__Employees__Emplo__4B0D20AB") @db.NVarChar(36)
+  CompanyGeneralCrmId                   String   @db.NVarChar(36)
+  CreatedAt                             DateTime @default(now(), map: "DF__Employees__Creat__4C0144E4") @db.DateTime
+  DocumemtType                          String?  @db.NVarChar(50)
+
+  @@index([CompanyGeneralCrmId], map: "IX_EmployeesAccessLkupDocumentTypeTemp.CompanyGeneralCrmId")
+}
+
+model EmployeesAccessTemp {
+  EmployeesAccessTempId  String   @id(map: "PK_EmployeesAccessTempId") @default("newid()", map: "DF__Employees__Emplo__2EA5EC27") @db.NVarChar(36)
+  CompanyGeneralCrmId    String   @db.NVarChar(36)
+  CreatedAt              DateTime @default(now(), map: "DF__Employees__Creat__2F9A1060") @db.DateTime
+  AgentID                String?  @db.NVarChar(50)
+  AreaMan                String?  @db.NVarChar(50)
+  AppartmentNum          String?  @db.NVarChar(50)
+  BirthDate              String?  @db.NVarChar(50)
+  CityName               String?  @db.NVarChar(100)
+  CoatReceivingDate      String?  @db.NVarChar(50)
+  CoatSize               String?  @db.NVarChar(50)
+  CountryID              String?  @db.NVarChar(50)
+  CountryName            String?  @db.NVarChar(50)
+  CourseAtatDate         String?  @db.NVarChar(50)
+  CourseAtatExpireDate   String?  @db.NVarChar(50)
+  CustomerName           String?  @db.NVarChar(100)
+  CustomerStatus         String?  @db.NVarChar(50)
+  CustomerID             String?  @db.NVarChar(50)
+  EmployeeFirstName      String?  @db.NVarChar(100)
+  EmployeeID             String?  @db.NVarChar(50)
+  EmployeeLastName       String?  @db.NVarChar(100)
+  EmployeeNumber         String?  @db.NVarChar(50)
+  EndInsuranceDate       String?  @db.NVarChar(50)
+  EntranceDate           String?  @db.NVarChar(50)
+  HealthFund             String?  @db.NVarChar(100)
+  HouseID                String?  @db.NVarChar(50)
+  HouseNumber            String?  @db.NVarChar(50)
+  InsuranceCompany       String?  @db.NVarChar(50)
+  InsuranceNumber        String?  @db.NVarChar(50)
+  InsuredNumber          String?  @db.NVarChar(50)
+  IsCourseAtat           String?  @db.NVarChar(10)
+  Isbriefing             String?  @db.NVarChar(10)
+  LocalityName           String?  @db.NVarChar(50)
+  LocalityCode           String?  @db.NVarChar(50)
+  LocalityID             String?  @db.NVarChar(50)
+  LongshirtReceivingDate String?  @db.NVarChar(50)
+  LongshirtSize          String?  @db.NVarChar(10)
+  MobilePhone            String?  @db.NVarChar(50)
+  PantsReceivingDate     String?  @db.NVarChar(50)
+  PassportNumber         String?  @db.NVarChar(50)
+  ProfessionName         String?  @db.NVarChar(100)
+  ProfessionSecondName   String?  @db.NVarChar(100)
+  ProfessionThirdName    String?  @db.NVarChar(100)
+  ShoesNumber            String?  @db.NVarChar(50)
+  ShoesReceiveDate       String?  @db.NVarChar(50)
+  SizeOfPantes           String?  @db.NVarChar(50)
+  SizeOfshirt            String?  @db.NVarChar(50)
+  StartDate              String?  @db.NVarChar(50)
+  StatusName             String?  @db.NVarChar(50)
+  Street                 String?  @db.NVarChar(150)
+  TshirReceivingDate     String?  @db.NVarChar(50)
+  briefingDate           String?  @db.NVarChar(50)
+  briefingExpireDate     String?  @db.NVarChar(50)
+  startInsuranceDate     String?  @db.NVarChar(50)
+
+  @@index([CompanyGeneralCrmId], map: "IX_CompanyGeneralCrmId_EmployeesAccessTemp")
+}
+
+model ErrorsPhpLogs {
+  ErrorsPhpLogsId Int       @id(map: "PK__ErrorsPh__779EF85BBAD741F1") @default(autoincrement())
+  CreatedAt       DateTime? @default(now(), map: "DF__ErrorsPhp__Creat__32767D0B") @db.DateTime
+  tokenData       String?   @db.NVarChar(Max)
+  urlController   String?   @db.NVarChar(Max)
+  sendData        String?   @db.NVarChar(Max)
+  errorMessg      String?   @db.NVarChar(Max)
+}
+
+model Lkup_ActionType {
+  ActionTypeID                            Int                                       @id(map: "PK_Lkup_ActionType") @default(autoincrement())
+  ActionType                              String?                                   @db.NVarChar(50)
+  IsIgnoreHours                           Int?                                      @db.TinyInt
+  EmployeeHours                           EmployeeHours[]
+  EmployeeHoursByLocalityTotalsActionType EmployeeHoursByLocalityTotalsActionType[]
+}
+
+model LogEnterEmployee {
+  LogEnterEmployee Int       @id(map: "PK__LogEnter__8C3223D99C783F32") @default(autoincrement())
+  UserID           String    @db.NVarChar(Max)
+  CompanyID        String    @db.NVarChar(Max)
+  EmployeeID       Int
+  CreatedAt        DateTime? @db.DateTime
+  ResultsData      String?   @db.NVarChar(Max)
+}
+
+model LogSearchs {
+  LogSearchsId Int       @id(map: "PK__LogSearc__2208FF49C270334A") @default(autoincrement())
+  UserID       String    @db.NVarChar(36)
+  CompanyID    String    @db.NVarChar(36)
+  CreatedAt    DateTime? @default(now(), map: "DF__LogSearch__Creat__70A8B9AE") @db.DateTime
+  searchData   String?   @db.NVarChar(Max)
+  resultsCount Int?
+}
+
+model LogSignUp {
+  LogSignUpId Int       @id(map: "PK__LogSignU__44EDBF7F0A4DD980") @default(autoincrement())
+  UserID      String    @db.NVarChar(36)
+  CompanyID   String    @db.NVarChar(36)
+  CreatedAt   DateTime? @default(now(), map: "DF__LogSignUp__Creat__73852659") @db.DateTime
+}
+
+model MessagesEmployees {
+  MessageEmployeeId        String              @id(map: "PK_MessageEmployees") @default("newid()", map: "DF__MessagesE__Messa__6F7F8B4B") @db.NVarChar(36)
+  CreatedAt                DateTime            @default(now(), map: "DF__MessagesE__Creat__7073AF84") @db.DateTime
+  FinalDateForTask         DateTime?           @db.DateTime
+  ReadedAt                 DateTime?           @db.DateTime
+  DoneAt                   DateTime?           @db.DateTime
+  SendResponseAtStatusDone Int?                @default(0, map: "DF__MessagesE__SendR__7167D3BD") @db.TinyInt
+  CompanyIdGeneralCRM      String              @db.NVarChar(36)
+  UserFromIdGeneralCRM     String              @db.NVarChar(36)
+  UserToIdGeneralCRM       String              @db.NVarChar(36)
+  IsReplyToMessageId       String?             @db.NVarChar(36)
+  MessageStatusId          String              @default("C00CFDFA-9B31-49E4-95DD-DDFC98783C22", map: "DF__MessagesE__Messa__725BF7F6") @db.NVarChar(36)
+  MessageSubject           String?             @db.NVarChar(255)
+  MessageText              String?             @db.NVarChar(Max)
+  LinkEmployees            String?             @db.NVarChar(Max)
+  LinkHouses               String?             @db.NVarChar(Max)
+  MessagesEmployees        MessagesEmployees?  @relation("MessagesEmployeesToMessagesEmployees", fields: [IsReplyToMessageId], references: [MessageEmployeeId], onDelete: NoAction, onUpdate: NoAction, map: "PK_IsReplyToMessageId")
+  other_MessagesEmployees  MessagesEmployees[] @relation("MessagesEmployeesToMessagesEmployees")
+  MessagesStatus           MessagesStatus      @relation(fields: [MessageStatusId], references: [MessagesStatusId], onUpdate: NoAction, map: "pk_MessageStatusId")
+}
+
+model MessagesStatus {
+  MessagesStatusId   String              @id(map: "PK_MessagesStatusId") @default("newid()", map: "DF__MessagesS__Messa__6ABAD62E") @db.NVarChar(36)
+  MessagesStatusName String              @db.NVarChar(255)
+  CreatedAt          DateTime?           @default(now(), map: "DF__MessagesS__Creat__6BAEFA67") @db.DateTime
+  Sort               Int                 @default(1, map: "DF__MessagesSt__Sort__6CA31EA0")
+  Comments           String?             @db.NVarChar(255)
+  MessagesEmployees  MessagesEmployees[]
+}
+
+model SiteConfig {
+  SiteConfigId           Int       @id(map: "PK__SiteConf__E6259709656131A6") @default(autoincrement())
+  PropertyEngName        String    @db.NVarChar(50)
+  PropertyIntValue       Float?
+  PropertyTextValue      String?   @db.NVarChar(Max)
+  PropertyHebDescription String    @db.NVarChar(Max)
+  CreatedAt              DateTime? @default(now(), map: "DF__SiteConfi__Creat__681373AD") @db.DateTime
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B6124B7B0C3") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model UsersLinkedViewRole {
+  UsersLinkedViewRoleId String        @id(map: "PK_UsersLinkedViewRoleId") @default("newid()", map: "DF__UsersLink__Users__1209AD79") @db.NVarChar(36)
+  CreatedAt             DateTime?     @default(now(), map: "DF__UsersLink__Creat__12FDD1B2") @db.DateTime
+  CompanyID             String        @db.NVarChar(36)
+  UserID                String        @unique(map: "IX_UserID_UsersLinkedViewRole") @db.NVarChar(36)
+  UserViewRolesId       String        @db.NVarChar(36)
+  UserViewRoles         UserViewRoles @relation(fields: [UserViewRolesId], references: [UserViewRolesId], onUpdate: NoAction, map: "PK_UserViewRolesId")
+
+  @@index([CompanyID], map: "IX_CompanyID_UsersLinkedViewRole")
+}
+
+model UserViewRoles {
+  UserViewRolesId     String                @id(map: "PK_UserAdminSetsId") @default("newid()", map: "DF__UserViewR__UserV__0880433F") @db.NVarChar(36)
+  CreatedAt           DateTime?             @default(now(), map: "DF__UserViewR__Creat__09746778") @db.DateTime
+  CompanyID           String                @db.NVarChar(36)
+  UserViewRoleName    String                @db.NVarChar(255)
+  NotShowFields       String?               @db.NVarChar(Max)
+  MaxSearchResults    Int?
+  EditFields          String?               @db.NVarChar(Max)
+  UsersLinkedViewRole UsersLinkedViewRole[]
+
+  @@index([CompanyID], map: "IX_CompanyID_UserViewRoles")
+}

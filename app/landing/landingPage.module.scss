@@ -1,0 +1,26 @@
+@import "../globalStyles/index.scss";
+
+.formLogin {
+    display: flex;
+    justify-content: center;
+    background: url("../../img/logoBg.png") top center no-repeat white;
+    background-size: 100%;
+    h1 {
+        text-align: right;
+        color: $greenTidar;
+        /* letter-spacing: -2px; */
+        color: $greenNirBar;
+        font-size: 25px;
+        margin: 0;
+    }
+
+    .grid {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .logoLogin {
+        margin: 0 0 30px 0;
+        width: 150px;
+    }
+}

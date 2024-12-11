@@ -1,0 +1,13 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#47203A",
+        "titleBar.activeBackground": "#642D51",
+        "titleBar.activeForeground": "#FCF9FB"
+    },
+    "cSpell.words": [
+        "prefixer",
+        "stylis"
+    ],
+    "WillLuke.nextjs.addTypesOnSave": true,
+    "WillLuke.nextjs.hasPrompted": true
+}
