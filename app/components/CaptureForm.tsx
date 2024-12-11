@@ -118,15 +118,17 @@ const CaptureForm: React.FC = () => {
 
     return (
         <Box
+            className={styles.box}
             sx={{
                 maxWidth: "900px",
                 margin: "0 auto",
                 display: "flex",
                 flexDirection: "column",
-                gap: "16px",
             }}
         >
-            <h1>היי, טוב לראות אותך שוב!</h1>
+            <h1 className={styles.title}>היי, סססס טוב לראות אותך!</h1>
+            <p className={styles.subTitle}>מלאו את הפרטים הבאים כדי לרשום לקוח</p>
+
             <form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>

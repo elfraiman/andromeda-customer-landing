@@ -5,14 +5,6 @@
     justify-content: center;
     background: url("../../img/logoBg.png") top center no-repeat white;
     background-size: 100%;
-    h1 {
-        text-align: right;
-        color: $greenTidar;
-        /* letter-spacing: -2px; */
-        color: $greenNirBar;
-        font-size: 25px;
-        margin: 0;
-    }
 
     .grid {
         background: transparent;
@@ -20,7 +12,16 @@
     }
 
     .logoLogin {
-        margin: 0 0 30px 0;
+        margin: 0 0 26px 0;
         width: 150px;
+    }
+}
+
+@media (max-width: 768px) {
+    .formLogin {
+        height: 100vh;
+    }
+    .grid {
+        margin-top: 26px;
     }
 }

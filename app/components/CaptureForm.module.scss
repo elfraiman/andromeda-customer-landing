@@ -8,11 +8,27 @@
         border: none;
         padding: 5px 10px;
     }
+
     input {
         border-radius: 20px;
         background-color: #f3f4f7 !important;
         padding: 15px 5px;
+        height: 50px;
+        width: 100%; // Ensure input fields take up the full width on smaller screens
+        box-sizing: border-box; // Prevent padding from affecting width
     }
+}
+
+.title {
+    font-weight: 400;
+    color: $greenTidar;
+    color: $greenNirBar;
+    font-size: 25px;
+    margin: 0;
+}
+
+.subTitle {
+    margin-bottom: 26px;
 }
 
 .loginBtn {
@@ -22,11 +38,48 @@
     margin: 10px 0 0 0;
     color: white;
     height: 50px;
-    font-size: 24px;
+    font-size: 18px; // Reduce font size for better fit on mobile
     width: 100%;
     margin-top: 26px;
 
     &:hover {
         background: $greenTidar;
+    }
+}
+
+.mobileTitle {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.mobileSubTitle {
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.mobileLoginBtn {
+    height: 40px;
+    font-size: 16px;
+    width: 100%;
+}
+// Mobile-specific styles
+@media (max-width: 768px) {
+    .box {
+        padding: 26px;
+    }
+
+    .title {
+        font-size: 22px !important; // Smaller font size for mobile
+    }
+
+    .subTitle {
+        font-size: 14px !important; // Smaller font size for subtitles
+        margin-bottom: 20px;
+    }
+
+    .loginBtn {
+        font-size: 16px; // Adjust button text size
+        height: 45px; // Reduce button height
     }
 }

@@ -12,7 +12,6 @@ export default function Landing() {
     return (
         <Grid container className={styles.formLogin} component="main" sx={{ height: '100vh' }}>
             <CssBaseline />
-
             <Grid
                 item
                 xs={false}
