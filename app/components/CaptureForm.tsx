@@ -1,99 +1,41 @@
 "use client";
-import username from "@/img/svg/username.svg";
 import { Companies } from "@/prisma/generated/base";
-import { Box, Checkbox, CircularProgress, FormControlLabel, InputAdornment, TextField } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, MenuItem, TextField, Tooltip } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Dayjs } from "dayjs";
-import Image from "next/image";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
-import styles from "./CaptureForm.module.scss";
-import LanguageRestrictedInput from "./LanguageRestrictedInput";
+import { useLandPage } from "../context/LandPageContext";
 import { useProducts } from "../context/ProductsContext";
-import { Tooltip } from "@mui/material";
+import { createInputsBuilder } from "../utils/inputsBuilderUsers";
+import { generatePassword } from "../utils/utilityFunctions";
+import styles from "./CaptureForm.module.scss";
 
 // Form types
 interface FormData {
-    firstName: string;
-    lastName: string;
-    firstNameHeb: string;
-    lastNameHeb: string;
-    personId: string;
-    phoneNumber: string;
-    email: string;
-    dateOfBirth: Dayjs | null | string;
     selectedProducts: Record<string, boolean>;
+    [key: string]: string | boolean | number | Record<string, boolean>; // Allow dynamic fields
+}
+
+interface UpdateData {
+    LandPageRowId: string;
+    user: FormData;
 }
 
 const CaptureForm = (props: { companyData: Companies }) => {
+    const inputsBuilder = createInputsBuilder();
     const { filteredProducts } = useProducts();
-    const [formData, setFormData] = useState<FormData>({
-        firstName: "",
-        lastName: "",
-        firstNameHeb: "",
-        lastNameHeb: "",
-        personId: "",
-        phoneNumber: "",
-        email: "",
-        dateOfBirth: null,
-        selectedProducts: {},
-    });
-
+    const { landPageRowId } = useLandPage();
+    const [formData, setFormData] = useState<FormData>(
+        inputsBuilder.reduce((acc, input) => {
+            acc[input.name] = input.defaultValue;
+            return acc;
+        }, { selectedProducts: {} })
+    );
+    const [errors, setErrors] = useState<Record<string, string | null>>({});
     const [loading, setLoading] = useState<boolean>(false);
-    const [showErrors, setShowErrors] = useState<boolean>(false);
 
-    // Error state for individual fields
-    const [errors, setErrors] = useState<Partial<FormData>>({});
 
-    const validateField = (name: keyof FormData, value: string | Dayjs | null): string | null => {
-        switch (name) {
-            case "firstName":
-            case "lastName":
-                return value ? null : "שדה זה חובה";
-            case "firstNameHeb":
-            case "lastNameHeb":
-                return /^[א-ת\s]+$/.test(value as string) ? null : "חייב להיות בעברית.";
-            case "personId":
-                return /^\d{9}$/.test(value as string) ? null : "תעודה מזהה חייבת להיות בת 9 ספרות.";
-            case "phoneNumber":
-                return /^\d{10}$/.test(value as string) ? null : "מספר הטלפון חייב להיות בן 10 ספרות.";
-            case "email":
-                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value as string) ? null : "הזן אימייל חוקי.";
-            case "dateOfBirth":
-                return value ? null : "תאריך לידה נדרש";
-            default:
-                return null;
-        }
-    };
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-
-        const error = validateField(name as keyof FormData, value);
-        setErrors((prev) => ({
-            ...prev,
-            [name]: error,
-        }));
-    };
-
-    const handleDateChange = (date: Dayjs | null): void => {
-        setFormData((prev) => ({
-            ...prev,
-            dateOfBirth: date,
-        }));
-
-        const error = validateField("dateOfBirth", date);
-        setErrors((prev: Partial<FormData>) => ({
-            ...prev,
-            dateOfBirth: error,
-        }));
-    };
     useEffect(() => {
         if (filteredProducts.length > 0) {
             setFormData((prev) => ({
@@ -101,7 +43,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                 selectedProducts: filteredProducts.reduce(
                     (acc, product) => ({
                         ...acc,
-                        [product.ProductName]: prev.selectedProducts[product.ProductName] ?? true, // Preserve existing values or default to true
+                        [product.ProductName]: prev.selectedProducts?.[product.ProductName] ?? true, // Preserve existing values or default to true
                     }),
                     {}
                 ),
@@ -109,6 +51,64 @@ const CaptureForm = (props: { companyData: Companies }) => {
         }
     }, [filteredProducts]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const validateField = (name: string, value: any, validate: string[]): string | null => {
+        for (const rule of validate) {
+            switch (rule) {
+                case "notEmpty":
+                    if (!value) return "This field is required.";
+                    break;
+                case "upTo20":
+                    if (value.length > 20) return "Maximum 20 characters allowed.";
+                    break;
+                case "tz":
+                    if (!/^\d{9}$/.test(value)) return "Invalid ID format.";
+                    break;
+                case "phone":
+                    if (!/^\d{10}$/.test(value)) return "Invalid phone number.";
+                    break;
+                case "email":
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Invalid email.";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return null;
+    };
+
+    const handleGeneratePassword = () => {
+        const newPassword = generatePassword();
+        setFormData((prev) => ({
+            ...prev,
+            password: newPassword, // Assuming "password" is the field name
+        }));
+    };
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>, action: string) => {
+        const { name, value } = e.target;
+        const inputConfig = inputsBuilder.find((input) => input.name === name);
+
+        // Handle number validation
+        if (action === 'number') {
+            const numericValue = Number(value);
+            if (numericValue < 0 || isNaN(numericValue)) {
+                return; // Exit early for invalid values
+            }
+        }
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        if (inputConfig?.validate) {
+            const error = validateField(name, value, inputConfig.validate);
+            setErrors((prev) => ({
+                ...prev,
+                [name]: error,
+            }));
+        }
+    };
 
     const handleProductChange = (productName: string) => {
         setFormData((prev) => ({
@@ -120,33 +120,62 @@ const CaptureForm = (props: { companyData: Companies }) => {
         }));
     };
 
-    const handleSubmit = (e: FormEvent): void => {
-        e.preventDefault();
-        setShowErrors(true);
+    const updateLandPage = async (updateData: UpdateData) => {
+        try {
+            const response = await fetch('/api/update-landpage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData),
+            });
 
-        // Check for any remaining errors
-        const newErrors: Partial<FormData> = {};
-        Object.keys(formData).forEach((key) => {
-            const error = validateField(key as keyof FormData, formData[key as keyof FormData]);
-            if (error) newErrors[key as keyof FormData] = error;
+            if (!response.ok) {
+                throw new Error('Failed to update LandPage');
+            }
+
+            const result = await response.json();
+            console.log('Update successful:', result);
+            setLoading(false);
+            toast.success("Form submitted successfully!");
+
+        } catch (error) {
+            setLoading(false);
+            console.error('Error updating LandPage:', error);
+            toast.error("Form submitted successfully!");
+        }
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        const newErrors: Record<string, string | null> = {};
+
+        inputsBuilder.forEach((input) => {
+            const error = validateField(input.name, formData[input.name], input.validate || []);
+            if (error) newErrors[input.name] = error;
         });
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+        setErrors(newErrors);
+
+        if (Object.values(newErrors).some((error) => error)) {
             toast.warning("Please fix the errors in the form.");
             return;
         }
 
         setLoading(true);
 
-        // Simulate form submission
-        setTimeout(() => {
-            setLoading(false);
-            toast.success("Form submitted successfully!");
-        }, 2000);
-    };
+        if (!landPageRowId) {
+            console.log('No LandPageRowId provided.');
+            return;
+        }
 
-    const hasErrors = Object.values(errors).some((error) => error !== null);
+        const updateData = {
+            LandPageRowId: landPageRowId,
+            user: formData,
+        }
+
+        await updateLandPage(updateData);
+    };
 
     return (
         <Box
@@ -159,195 +188,87 @@ const CaptureForm = (props: { companyData: Companies }) => {
             }}
         >
             <h1 className={styles.title}>היי, {props?.companyData?.CompanyName} טוב לראות אותך!</h1>
-            <p className={styles.subTitle}>מלאו את הפרטים הבאים כדי לרשום לקוח</p>
+            <p className={styles.subTitle}>מלאו את הפרטים הבאים לפתיחת משתמש חדש</p>
 
             <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
-                    <Grid2 xs={12} sm={6}>
-                        <TextField
-                            name="firstName"
-                            placeholder="שם פרטי בלועזית"
-                            label={formData.firstName ? "שם פרטי בלועזית" : ""}
-                            className={styles.formInput}
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            error={!!errors.firstName}
-                            helperText={errors.firstName}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Image width={26} height={26} src={username} alt={`Icon`} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <TextField
-                            name="lastName"
-                            placeholder="שם משפחה בלועזית"
-                            label={formData.lastName ? "שם משפחה בלועזית" : ""}
-                            className={styles.formInput}
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            error={!!errors.lastName}
-                            helperText={errors.lastName}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Image width={26} height={26} src={username} alt={`Icon`} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <LanguageRestrictedInput
-                            name="firstNameHeb"
-                            icon={username}
-                            placeholder="שם פרטי בעברית"
-                            label="שם פרטי בעברית"
-                            value={formData.firstNameHeb}
-                            showError={!!errors.firstNameHeb}
-                            onChange={handleChange}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <LanguageRestrictedInput
-                            name="lastNameHeb"
-                            icon={username}
-                            placeholder="שם משפחה בעברית"
-                            label="שם משפחה בעברית"
-                            value={formData.lastNameHeb}
-                            showError={!!errors.lastNameHeb}
-                            onChange={handleChange}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <TextField
-                            name="personId"
-                            type="number"
-                            className={styles.formInput}
-                            placeholder="תעודת זהות"
-                            label={formData.personId ? "תעודת זהות" : ""}
-                            value={formData.personId}
-                            onChange={handleChange}
-                            error={!!errors.personId}
-                            helperText={errors.personId}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Image width={26} height={26} src={username} alt={`Icon`} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <TextField
-                            name="phoneNumber"
-                            type="number"
-                            className={styles.formInput}
-                            placeholder="טלפון נייד"
-                            label={formData.phoneNumber ? "טלפון נייד" : ""}
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            error={!!errors.phoneNumber}
-                            helperText={errors.phoneNumber}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Image width={26} height={26} src={username} alt={`Icon`} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <TextField
-                            name="email"
-                            placeholder="אימייל"
-                            label={formData.email ? "אימייל" : ""}
-                            className={styles.formInput}
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={!!errors.email}
-                            helperText={errors.email}
-                            fullWidth
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <Image width={26} height={26} src={username} alt={`Icon`} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Grid2>
-
-                    <Grid2 xs={12} sm={6}>
-                        <DatePicker
-                            label="תאריך לידה"
-                            value={formData.dateOfBirth}
-                            onChange={handleDateChange}
-                            slotProps={{
-                                textField: {
-                                    error: !!errors.dateOfBirth,
-                                    helperText: errors.dateOfBirth || "",
-                                    fullWidth: true,
-                                    className: styles.formInput,
-                                },
-                            }}
-                        />
-                    </Grid2>
+                    {inputsBuilder.map((input) => (
+                        <Grid2 key={input.name} xs={12} sm={input.colSize || 6}>
+                            {input.type === "select" ? (
+                                <TextField
+                                    select
+                                    name={input.name}
+                                    label={input.label}
+                                    value={formData[input.name]}
+                                    onChange={handleChange}
+                                    error={!!errors[input.name]}
+                                    helperText={errors[input.name]}
+                                    fullWidth
+                                    SelectProps={{
+                                        MenuProps: {
+                                            PaperProps: {
+                                                style: {
+                                                    maxHeight: 200, // Adjust dropdown max height
+                                                    overflow: "auto", // Scroll if options exceed max height
+                                                },
+                                            },
+                                        },
+                                    }}
+                                >
+                                    {input.options?.map((option) => (
+                                        <MenuItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </MenuItem>
+                                    ))}
+                                </TextField>
+                            ) : (
+                                <TextField
+                                    name={input.name}
+                                    type={input.type}
+                                    placeholder={input.label}
+                                    label={formData[input.name] ? input.label : ""}
+                                    value={formData[input.name]}
+                                    onChange={handleChange}
+                                    error={!!errors[input.name]}
+                                    helperText={errors[input.name]}
+                                    fullWidth
+                                />
+                            )}
+                        </Grid2>
+                    ))}
                 </Grid2>
 
-                {filteredProducts.length === 0 ? (
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-                        <CircularProgress />
+                {filteredProducts.length > 0 && (
+                    <Box mt={3}>
+                        <h3>בחר מוצרים</h3>
+                        <Grid2 container spacing={1} >
+                            {filteredProducts.map((product) => (
+                                <Grid2 key={product.ProductName} xs={6} sm={3}>
+                                    <Tooltip title={product.ProductDescription || "No description available"} arrow>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={formData.selectedProducts?.[product.ProductName] ?? false}
+                                                    onChange={() => handleProductChange(product.ProductsId)}
+                                                    color="primary"
+                                                />
+                                            }
+                                            label={product.ProductName}
+                                        />
+                                    </Tooltip>
+                                </Grid2>
+                            ))}
+                        </Grid2>
                     </Box>
-                ) : (<Box mt={3}>
-                    <h3>בחר מוצרים</h3>
-                    <Grid2 container spacing={3}>
-                        {filteredProducts.map((product) => (
-                            <Grid2 key={product.ProductName} xs={12} sm={6}>
-                                <Tooltip title={product.ProductDescription || "No description available"} arrow>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formData.selectedProducts[product.ProductName] ?? false} // Default to false if undefined
-                                                onChange={() => handleProductChange(product.ProductName)}
-                                                color="primary"
-                                            />
-                                        }
-                                        label={product.ProductName}
-                                    />
-                                </Tooltip>
-                            </Grid2>
-                        ))}
-                    </Grid2>
-
-                    <Box>
-                        <Button type="submit" disabled={loading || hasErrors} className={styles.loginBtn}>
-                            {loading ? <Spinner animation="border" variant="light" /> : "שליחה"}
-                        </Button>
-                    </Box>
-                </Box>
-
                 )}
 
-            </form>
-        </Box>
-
+                <Box mb={3}>
+                    <Button type="submit" disabled={loading} className={styles.loginBtn}>
+                        {loading ? <Spinner animation="border" variant="light" /> : "הוסף משתמש"}
+                    </Button>
+                </Box>
+            </form >
+        </Box >
     );
 };
 

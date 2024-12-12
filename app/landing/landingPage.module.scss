@@ -5,8 +5,10 @@
     justify-content: center;
     background: url("../../img/logoBg.png") top center no-repeat white;
     background-size: 100%;
+    min-height: 100vh;
 
     .grid {
+        margin-top: 36px;
         background: transparent;
         box-shadow: none;
     }
