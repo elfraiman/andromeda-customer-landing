@@ -29,7 +29,7 @@ const addUserToJsonData = async (landPageRowId: string, user: any) => {
         }
 
         const userExists = currentData.users.some((userFromDb: any) =>
-            userFromDb.EmployeeIdentity === user.EmployeeIdentity || userFromDb.Email === user.Email
+            userFromDb.Username === user.Username
         );
 
         if (userExists) {

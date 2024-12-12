@@ -1,8 +1,6 @@
-import "./globals.css";
 import { ReactNode } from 'react';
 import ClientProviders from "./ClientProviders";
-import { LandPageProvider } from "./context/LandPageContext";
-import { ProductsProvider } from "./context/ProductsContext";
+import "./globals.css";
 
 
 
@@ -15,13 +13,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
       <body>
-        <LandPageProvider>
-          <ClientProviders>
-            <ProductsProvider>
-              {children}
-            </ProductsProvider>
-          </ClientProviders>
-        </LandPageProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

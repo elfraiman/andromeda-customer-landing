@@ -134,11 +134,8 @@ const CaptureForm = (props: { companyData: Companies }) => {
                 throw new Error('Failed to update LandPage');
             }
 
-            const result = await response.json();
-            console.log('Update successful:', result);
             setLoading(false);
             toast.success("Form submitted successfully!");
-
         } catch (error) {
             setLoading(false);
             console.error('Error updating LandPage:', error);
@@ -243,7 +240,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                         <h3>בחר מוצרים</h3>
                         <Grid2 container spacing={1} >
                             {filteredProducts.map((product) => (
-                                <Grid2 key={product.ProductName} xs={6} sm={3}>
+                                <Box key={product.ProductName} >
                                     <Tooltip title={product.ProductDescription || "No description available"} arrow>
                                         <FormControlLabel
                                             control={
@@ -256,7 +253,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                                             label={product.ProductName}
                                         />
                                     </Tooltip>
-                                </Grid2>
+                                </Box>
                             ))}
                         </Grid2>
                     </Box>

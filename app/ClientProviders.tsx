@@ -5,6 +5,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import CssBaseline from '@mui/material/CssBaseline';
+import { ProductsProvider } from './context/ProductsContext';
+import { LandPageProvider } from './context/LandPageContext';
 
 const theme = createTheme({
     palette: {
@@ -22,8 +24,12 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient} >
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <ThemeProvider theme={theme}>
-                    <CssBaseline />
-                    {children}
+                    <LandPageProvider>
+                        <ProductsProvider>
+                            <CssBaseline />
+                            {children}
+                        </ProductsProvider>
+                    </LandPageProvider>
                 </ThemeProvider>
             </LocalizationProvider>
         </QueryClientProvider>
