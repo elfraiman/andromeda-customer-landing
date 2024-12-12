@@ -1,7 +1,9 @@
 // /app/[landPageRowId]/page.tsx
 
-import LandingPage from '../landing/page';
-import { fetchLandings, fetchProducts } from '../utils/fetchLandPageCompany';
+import LandingPage from "@/app/landing/page";
+import { fetchProducts, fetchLandings } from "@/app/utils/fetchLandPageCompany";
+
+
 
 interface HomeProps {
   params: {
