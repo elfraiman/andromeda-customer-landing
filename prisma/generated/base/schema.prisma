@@ -1,0 +1,842 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/base"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_GENERAL_URL")
+}
+
+model AdvanceNotice {
+  AdvanceNoticeID Int    @id(map: "PK_AdvanceNotice") @default(autoincrement())
+  StartPeriod     Float?
+  EndPeriod       Float?
+  DaysOfNotice    Float?
+}
+
+model AutoWordReport {
+  ReportID                  Int                 @id(map: "PK_AutoWordReport") @default(autoincrement())
+  ReportName                String?             @db.NVarChar(150)
+  ReportTemplateName        String?             @db.NVarChar(50)
+  IsEmployee                Boolean
+  IsCustomer                Boolean
+  StrSQL                    String?             @db.NVarChar(Max)
+  IsChossCustomerOrEmployee Boolean
+  SaveInArchive             Int?                @db.TinyInt
+  IsView                    Boolean
+  AutoWordReportSub         AutoWordReportSub[]
+}
+
+model AutoWordReportSub {
+  ReportSubID     Int             @id(map: "PK_ReportSubID_AutoWordReportSub") @default(autoincrement())
+  ReportID        Int?
+  FieldNameTB     String?         @db.NVarChar(50)
+  FieldNameReport String?         @db.NVarChar(50)
+  AutoWordReport  AutoWordReport? @relation(fields: [ReportID], references: [ReportID], onDelete: NoAction, onUpdate: NoAction, map: "FK_AutoWordReportSub_AutoWordReport")
+
+  @@index([ReportID], map: "IX_ReportID_AutoWordReportSub")
+}
+
+model ChangeHistory {
+  ChangeHistoryID   Int       @id(map: "PK_ChangeHistory") @default(autoincrement())
+  Application_Name  String?   @map("Application Name") @db.NVarChar(50)
+  ChangeDate        DateTime? @db.DateTime
+  Version_Number    String?   @map("Version Number") @db.NVarChar(10)
+  ChangeDescription String?   @db.NVarChar(255)
+  ConvertDatabase   Boolean
+}
+
+model CitysIncomeTaxDiscount {
+  ID                    Int    @id(map: "PK_CitysIncomeTaxDiscount")
+  Year                  Float
+  GroupCode             Int
+  CityName              String @db.NVarChar(30)
+  DiscountPercent       Int?
+  MaximumIncome         Float? @db.Real
+  MaximumIncomePerMonth Float? @db.Real
+
+  @@index([CityName], map: "IX_CityName_CitysIncomeTaxDiscount")
+  @@index([GroupCode], map: "IX_GroupCode_CitysIncomeTaxDiscount")
+  @@index([Year], map: "IX_Year_CitysIncomeTaxDiscount")
+}
+
+model Companies {
+  CompanyID                                          String                              @id(map: "PK_CompanyID_Companies") @default("newid()", map: "DF_Companies_CompanyID") @db.NVarChar(36)
+  CompanyID_OLD                                      Int
+  CompanyNumber                                      Int                                 @unique(map: "IX_CompanyNumber_Companies")
+  DeductionsNumber                                   Int?
+  AgencyNumber                                       Int?
+  CompanyName                                        String                              @unique(map: "IX_CompanyName_Companies") @db.NVarChar(100)
+  CompanyNameEng                                     String?                             @db.NVarChar(100)
+  Address                                            String?                             @db.NVarChar(50)
+  CityID                                             Int?
+  ZipCode                                            String?                             @db.NChar(10)
+  POB                                                String?                             @db.NVarChar(50)
+  POB_ZipCode                                        String?                             @db.NChar(10)
+  Email                                              String?                             @db.NVarChar(100)
+  WebSite                                            String?                             @db.NVarChar(100)
+  Phone                                              String?                             @db.NVarChar(11)
+  Fax                                                String?                             @db.NVarChar(11)
+  NumOfPaySlipDisplay                                Int
+  PaySlipDefinitionID                                Int?
+  DbPathOnCloud                                      String?                             @db.NVarChar(255)
+  DocFilesPathOnCloud                                String?                             @db.NVarChar(255)
+  DbPathAgricultureCRM                               String?                             @db.NVarChar(255)
+  DisplayTypeID                                      Int                                 @default(3, map: "DF_Companies_DisplayTypeID")
+  IsSuperAdminCompany                                Int?                                @db.TinyInt
+  IsActive                                           Int?                                @db.TinyInt
+  IsExportAccounts                                   Int?                                @db.TinyInt
+  TaxAccountsToken                                   String?                             @db.NVarChar(Max)
+  IsGetTaxAccountsCode                               Int?                                @db.TinyInt
+  CompanyTaxAutoLink                                 String?                             @db.NVarChar(Max)
+  UserId                                             String?                             @db.NVarChar(36)
+  CompanyTypeID                                      String                              @default("6000035C-CD4C-44CB-922C-A9F3C4715CC3", map: "DF__Companies__Compa__473C8FC7") @db.NVarChar(36)
+  CompaniesType                                      CompaniesType                       @relation(fields: [CompanyTypeID], references: [CompaniesTypeID], onUpdate: NoAction, map: "CompaniesCompanyTypeID")
+  CompaniesUsers_Companies_UserIdToCompaniesUsers    CompaniesUsers?                     @relation("Companies_UserIdToCompaniesUsers", fields: [UserId], references: [CompaniesUsersID], onDelete: NoAction, onUpdate: NoAction, map: "CompaniesUserId")
+  CompaniesProducts                                  CompaniesProducts[]
+  CompaniesProductsExpireDates                       CompaniesProductsExpireDates[]
+  CompaniesUsers_CompaniesUsers_CompanyIDToCompanies CompaniesUsers[]                    @relation("CompaniesUsers_CompanyIDToCompanies")
+  CompaniesUsersProductsExpireDates                  CompaniesUsersProductsExpireDates[]
+  LandPages                                          LandPages?
+
+  @@index([CompanyID_OLD], map: "IX_CompanyID_OLD_Companies")
+  @@index([CompanyNameEng], map: "IX_CompanyNameEng_Companies")
+  @@index([DisplayTypeID], map: "IX_DisplayTypeID_Companies")
+}
+
+model CompaniesProducts {
+  CompaniesProductsId      String          @id(map: "PK_CompaniesProducts") @default("newid()", map: "DF__Companies__Compa__7814D14C") @db.NVarChar(36)
+  CreatedAt                DateTime?       @default(now(), map: "DF__Companies__Creat__7908F585") @db.DateTime
+  ProductId                String          @db.NVarChar(36)
+  CompanyID                String          @db.NVarChar(36)
+  UserId                   String?         @db.NVarChar(36)
+  LastVersionDate_Salary   DateTime?       @db.DateTime
+  LastVersionDate_ManPower DateTime?       @db.DateTime
+  CompaniesUsers           CompaniesUsers? @relation(fields: [UserId], references: [CompaniesUsersID], onDelete: NoAction, onUpdate: NoAction, map: "CompaniesProductsUserId")
+  Companies                Companies       @relation(fields: [CompanyID], references: [CompanyID], onUpdate: NoAction, map: "PK_CompanyIDCompanyProducts")
+  Products                 Products        @relation(fields: [ProductId], references: [ProductsId], onUpdate: NoAction, map: "PK_ProductIdCompanyProducts")
+}
+
+model CompaniesProductsExpireDates {
+  CompaniesProductsExpireDateId String          @id(map: "PK_CompaniesProductsExpireDate") @default("newid()", map: "DF__Companies__Compa__12C8C788") @db.NVarChar(36)
+  CreatedAt                     DateTime?       @default(now(), map: "DF__Companies__Creat__13BCEBC1") @db.DateTime
+  ProductId                     String          @db.NVarChar(36)
+  CompanyID                     String          @db.NVarChar(36)
+  StartDate                     DateTime        @db.Date
+  EndDate                       DateTime        @db.Date
+  Comments                      String?         @db.NVarChar(Max)
+  UserId                        String?         @db.NVarChar(36)
+  CompaniesUsers                CompaniesUsers? @relation(fields: [UserId], references: [CompaniesUsersID], onDelete: NoAction, onUpdate: NoAction, map: "CompaniesProductsExpireDatesUserId")
+  Companies                     Companies       @relation(fields: [CompanyID], references: [CompanyID], onUpdate: NoAction, map: "PK_CompanyIDCompanyProductsExpireDate")
+  Products                      Products        @relation(fields: [ProductId], references: [ProductsId], onUpdate: NoAction, map: "PK_ProductIdCompanyProductsExpireDate")
+}
+
+model CompaniesType {
+  CompaniesTypeID String      @id(map: "PK_CustomersType") @default("newid()", map: "DF_ApplicationType_ApplicationTypeID") @db.NVarChar(36)
+  CompaniesType   String      @db.NVarChar(50)
+  Companies       Companies[]
+}
+
+model CompaniesUsers {
+  CompaniesUsersID                                                                                     String                              @id(map: "PK_CompaniesUsersID_CompaniesUsers") @db.NVarChar(36)
+  CompanyID                                                                                            String                              @db.NVarChar(36)
+  CompanyID_OLD                                                                                        Int
+  EmployeeIdentity                                                                                     String                              @db.NVarChar(9)
+  BirthDate                                                                                            DateTime?                           @db.Date
+  LastName                                                                                             String                              @db.NVarChar(20)
+  FirstName                                                                                            String                              @db.NVarChar(20)
+  JobsID                                                                                               Int
+  Gender                                                                                               Int                                 @db.SmallInt
+  MobileNumber                                                                                         String                              @db.NVarChar(11)
+  Phone                                                                                                String?                             @db.NVarChar(11)
+  Fax                                                                                                  String?                             @db.NVarChar(11)
+  Email                                                                                                String                              @db.NVarChar(100)
+  UserName                                                                                             String                              @db.NVarChar(20)
+  Password                                                                                             String                              @db.NVarChar(20)
+  AreaMan                                                                                              String?                             @db.NVarChar(20)
+  IsAdmin                                                                                              Int                                 @db.TinyInt
+  LastEntry                                                                                            DateTime?                           @db.DateTime
+  IsAllowAccess2WebSite                                                                                Int                                 @default(0, map: "DF_CompaniesUsers_IsAllowAccess2WebSite") @db.TinyInt
+  UserId                                                                                               String?                             @db.NVarChar(36)
+  CreatedAt                                                                                            DateTime?                           @default(now(), map: "DF__Companies__Creat__1C5231C2") @db.DateTime
+  TwoFactorBase32Secret                                                                                String?                             @db.NVarChar(32)
+  DeviceData                                                                                           String?                             @db.NVarChar(Max)
+  Companies_Companies_UserIdToCompaniesUsers                                                           Companies[]                         @relation("Companies_UserIdToCompaniesUsers")
+  CompaniesProducts                                                                                    CompaniesProducts[]
+  CompaniesProductsExpireDates                                                                         CompaniesProductsExpireDates[]
+  CompaniesUsers                                                                                       CompaniesUsers?                     @relation("CompaniesUsersToCompaniesUsers", fields: [UserId], references: [CompaniesUsersID], onDelete: NoAction, onUpdate: NoAction, map: "CompaniesUsersUserId")
+  other_CompaniesUsers                                                                                 CompaniesUsers[]                    @relation("CompaniesUsersToCompaniesUsers")
+  Companies_CompaniesUsers_CompanyIDToCompanies                                                        Companies                           @relation("CompaniesUsers_CompanyIDToCompanies", fields: [CompanyID], references: [CompanyID], onUpdate: NoAction, map: "FK_CompaniesUsers_Companies")
+  CompaniesUsersProductsExpireDates_CompaniesUsersProductsExpireDates_CompaniesUsersIDToCompaniesUsers CompaniesUsersProductsExpireDates[] @relation("CompaniesUsersProductsExpireDates_CompaniesUsersIDToCompaniesUsers")
+  CompaniesUsersProductsExpireDates_CompaniesUsersProductsExpireDates_UserIdToCompaniesUsers           CompaniesUsersProductsExpireDates[] @relation("CompaniesUsersProductsExpireDates_UserIdToCompaniesUsers")
+
+  @@index([CompanyID], map: "IX_CompanyID_CompaniesUsers")
+  @@index([CompanyID_OLD], map: "IX_CompanyID_OLD_CompaniesUsers")
+  @@index([EmployeeIdentity], map: "IX_EmployeeIdentity_CompaniesUsers")
+  @@index([MobileNumber], map: "IX_MobileNumber_CompaniesUsers")
+  @@index([UserName], map: "IX_UserName_CompaniesUsers")
+}
+
+model CompaniesUsersProductsExpireDates {
+  CompaniesUsersProductsExpireDateId                                                String          @id(map: "PK_CompaniesUsersProductsExpireDate") @default("newid()", map: "DF__Companies__Compa__25DB9BFC") @db.NVarChar(36)
+  CreatedAt                                                                         DateTime?       @default(now(), map: "DF__Companies__Creat__26CFC035") @db.DateTime
+  ProductId                                                                         String          @db.NVarChar(36)
+  CompanyID                                                                         String          @db.NVarChar(36)
+  CompaniesUsersID                                                                  String          @db.NVarChar(36)
+  StartDate                                                                         DateTime        @db.Date
+  EndDate                                                                           DateTime        @db.Date
+  UserId                                                                            String?         @db.NVarChar(36)
+  Comments                                                                          String?         @db.NVarChar(Max)
+  CompaniesUsers_CompaniesUsersProductsExpireDates_CompaniesUsersIDToCompaniesUsers CompaniesUsers  @relation("CompaniesUsersProductsExpireDates_CompaniesUsersIDToCompaniesUsers", fields: [CompaniesUsersID], references: [CompaniesUsersID], onUpdate: NoAction, map: "PK_CompaniesUsersIDCompanyProducts")
+  Companies                                                                         Companies       @relation(fields: [CompanyID], references: [CompanyID], onUpdate: NoAction, map: "PK_CompaniesUsersIDCompanyProductsExpireDate")
+  CompaniesUsers_CompaniesUsersProductsExpireDates_UserIdToCompaniesUsers           CompaniesUsers? @relation("CompaniesUsersProductsExpireDates_UserIdToCompaniesUsers", fields: [UserId], references: [CompaniesUsersID], onDelete: NoAction, onUpdate: NoAction, map: "PK_CompaniesUsersProductsUserId")
+  Products                                                                          Products        @relation(fields: [ProductId], references: [ProductsId], onUpdate: NoAction, map: "PK_ProductIdCompaniesUsersProductsExpireDate")
+}
+
+model Copyright {
+  CopyrightID  Int    @id(map: "PK_Copyright")
+  Copyright    String @db.NVarChar(150)
+  DbGeneralVer Float  @db.Real
+
+  @@index([CopyrightID], map: "IX_CopyrightID_Copyright")
+}
+
+model Countries {
+  CountryID          Int      @id(map: "PK_CountryID_Countries") @default(autoincrement())
+  CountryCode        Int      @unique(map: "IX_CountryCode_Countries")
+  CountryName        String   @db.NVarChar(30)
+  CountryNameEnglish String   @db.NVarChar(50)
+  MultipleSelect     Boolean?
+  CommentPayslip     String?  @db.NVarChar(100)
+  CommentHour        String?  @db.NVarChar(100)
+  DefaultLanguageCol String?  @db.NChar(25)
+
+  @@index([CountryName], map: "IX_CountryName_Countries")
+}
+
+model CreditShift {
+  CreditShiftID         Int       @id(map: "PK_CreditShift") @default(autoincrement())
+  CreditShiftDate       DateTime? @db.DateTime
+  MaxCreditShiftPrecent Float?    @db.Real
+  MaxCreditShiftLimit   Float?    @db.Real
+  CreditPrecent         Float?    @db.Real
+
+  @@index([CreditShiftDate], map: "IX_CreditShiftDate_CreditShift")
+}
+
+model DaysInMonth {
+  DateManagedID     Int       @id(map: "PK_DateManagedID_DaysInMonth") @default(autoincrement())
+  DateManaged       DateTime  @unique(map: "IX_DateManaged_DaysInMonth") @db.DateTime
+  YearManaged       Int?
+  MonthManaged      Int?
+  DayInMonth        Float?    @db.Real
+  DayInWeek         Int?
+  WeekInYear        Int?
+  WeekInMonth       Int?
+  DayTypeID         Int?
+  StartEndTimeSabat DateTime? @db.DateTime
+  HolidayName       String?   @db.NVarChar(50)
+
+  @@index([DayTypeID], map: "IX_DayTypeID_DaysInMonth")
+  @@index([MonthManaged], map: "IX_MonthManaged_DaysInMonth")
+  @@index([YearManaged], map: "IX_YearManaged_DaysInMonth")
+}
+
+model DaysInMonth_NewYear {
+  DateManagedID     Int       @id(map: "PK_DaysInMonthID_NewYear") @default(autoincrement())
+  DateManaged       DateTime  @unique(map: "IX_DateManaged_DaysInMonth_NewYear") @db.DateTime
+  YearManaged       Int?
+  MonthManaged      Int?
+  DayInMonth        Float?    @db.Real
+  DayInWeek         Int?
+  WeekInYear        Int?
+  WeekInMonth       Int?
+  DayTypeID         Int?
+  StartEndTimeSabat DateTime? @db.DateTime
+  HolidayName       String?   @db.NVarChar(50)
+
+  @@index([DayTypeID], map: "IX_DayTypeID_DaysInMonth_NewYear")
+  @@index([MonthManaged], map: "IX_MonthManaged_DaysInMonth_NewYear")
+  @@index([YearManaged], map: "IX_YearManaged_DaysInMonth_NewYear")
+}
+
+model DayType {
+  DayTypeID   Int    @id(map: "PK_DayTypeID")
+  DayTypeName String @db.NVarChar(40)
+  SetOrder    Int
+}
+
+model DisplayType {
+  DisplayTypeID     Int    @id(map: "PK_DisplayType") @default(autoincrement())
+  DisplayType       String @db.NVarChar(50)
+  URL               String @db.NVarChar(255)
+  IsShowInDanzarCRM Int    @default(0, map: "DF_DisplayType_IsShowInDanzarCRM")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model FormsType {
+  FormsTypeID       String  @db.NVarChar(36)
+  FormName          String  @db.NVarChar(255)
+  FormNumberAccess  Int?
+  SignaturePosition String? @db.NVarChar(Max)
+  FormNameEng       String? @db.NVarChar(255)
+  Base64Template    String? @db.NVarChar(Max)
+
+  @@ignore
+}
+
+model HashIndexGeneral {
+  HashCode Int     @id(map: "PK_HashIndexGeneral") @default(autoincrement())
+  HashName String? @unique(map: "IX_HashName_HashIndexGeneral") @db.NVarChar(50)
+}
+
+model HashSecurity {
+  HashID   String @id(map: "PK_HashID_HashSecurity") @default("newid()", map: "DF_HashSecurity_HashID") @db.NVarChar(36)
+  HashCode BigInt
+  IsUse    Int    @default(0, map: "DF_HashSecurity_IsUse") @db.TinyInt
+
+  @@index([HashID], map: "IX_HashSecurity")
+}
+
+model Jobs {
+  JobsID   Int    @id(map: "PK_Jobs") @default(autoincrement())
+  JobTitle String @unique(map: "IX_JobTitle_Jobs") @db.NVarChar(50)
+}
+
+model KupaGemel {
+  KupaID                      Int     @id(map: "PK_KupaGemel") @default(autoincrement())
+  KupaName                    String? @db.NVarChar(255)
+  AllowanceEmployeePercent    Float?
+  AllowanceEmployerPercent    Float?
+  AllowanceCompensationPercen Float?
+  IsAndromedaRecord           Boolean
+  EducationFundPercentEmp     Float?
+  EducationFundPercentEmpoyer Float?
+
+  @@index([KupaID], map: "IX_KupaID_KupaGemel")
+}
+
+model LandPages {
+  LandPageRowId String    @id(map: "PK_LandPageRowId") @default("newid()", map: "DF__LandPages__LandP__6E565CE8") @db.NVarChar(36)
+  CompanyID     String    @unique(map: "UQ__LandPage__2D971C4D4D166448") @db.NVarChar(36)
+  CreatedAt     DateTime? @default(now(), map: "DF__LandPages__Creat__6F4A8121") @db.DateTime
+  JsonData      String?   @db.NVarChar(Max)
+  ViewDate      DateTime? @db.DateTime
+  CompletedDate DateTime? @db.DateTime
+  Companies     Companies @relation(fields: [CompanyID], references: [CompanyID], onUpdate: NoAction, map: "PK_CompanyID_Land")
+}
+
+model LanguageDefinition {
+  LanguageDefinitionID Int     @id(map: "PK_LanguageDefinition") @default(autoincrement())
+  ObjectName           String  @db.NVarChar(25)
+  ControlTypeID        Int
+  ControlName          String  @unique(map: "IX_ControlName_LanguageDefinition") @db.NVarChar(100)
+  CaptionEnglish       String? @db.NVarChar(100)
+  CaptionHebrow        String? @db.NVarChar(100)
+  CaptionRomanian      String? @db.NVarChar(100)
+  CaptionRussian       String? @db.NVarChar(100)
+  CaptionChinese       String? @db.NVarChar(100)
+  CaptionTurkish       String? @db.NVarChar(100)
+
+  @@index([ControlTypeID], map: "IX_ControlTypeID_LanguageDefinition")
+  @@index([ObjectName], map: "IX_ObjectName_LanguageDefinition")
+}
+
+model Lkup_Area {
+  AreaID   Int    @id(map: "PK_AreaID_Lkup_Area") @default(autoincrement())
+  AreaCode Int    @unique(map: "IX_AreaCode_Lkup_Area")
+  AreaName String @unique(map: "IX_AreaName_Lkup_Area") @db.NVarChar(70)
+  Amount   Float
+}
+
+model Lkup_Banks {
+  BankID     Int    @id(map: "PK_Lkup_Banks") @default(autoincrement())
+  BankName   String @db.NVarChar(50)
+  BankNumber Int    @unique(map: "IX_BankNumber_Lkup_Banks")
+  CountryID  Int?
+
+  @@index([BankName], map: "IX_BankName_Lkup_Banks")
+  @@index([CountryID], map: "IX_CountryID_Lkup_Banks")
+}
+
+model Lkup_BanksVerBranch {
+  BranchID   Int     @id(map: "PK_Lkup_BanksVerBranch") @default(autoincrement())
+  BankID     Int?
+  BranchName String? @db.NVarChar(50)
+  BranchCode String? @db.NVarChar(8)
+  Address    String? @db.NVarChar(200)
+  SortCode   String? @db.NVarChar(40)
+  Phone_1    String? @map("Phone#1") @db.NVarChar(30)
+  Phone_2    String? @map("Phone#2") @db.NVarChar(30)
+  FaxNumber  String? @db.NVarChar(30)
+  EMail      String? @db.NVarChar(Max)
+  Comment    String? @db.NVarChar(Max)
+
+  @@unique([BranchCode, BankID], map: "IX_Lkup_BranchCodeVerBankID_BanksVerBranch")
+  @@index([BankID], map: "IX_Lkup_BankID_BanksVerBranch")
+  @@index([SortCode], map: "IX_SortCode_Lkup_BanksVerBranch")
+}
+
+model Lkup_City {
+  CityID      Int    @id(map: "PK_CityID_Lkup_City") @default(autoincrement())
+  CityCode    Int    @unique(map: "IX_CityCode_Lkup_City")
+  CityName    String @db.NVarChar(50)
+  CityNameEng String @db.NVarChar(50)
+
+  @@index([CityName], map: "IX_CityName_Lkup_City")
+}
+
+model Lkup_Corporation {
+  CorporationID       Int     @id(map: "PK_Lkup_Corporation") @default(autoincrement())
+  CorporationName     String  @unique(map: "IX_CorporationName_Lkup_Corporation") @db.NVarChar(50)
+  IsActive            Int     @default(1, map: "DF_Lkup_Corporation_IsActive")
+  CorporationNumber   Int     @unique(map: "IX_Lkup_Corporation")
+  Address             String? @db.NVarChar(100)
+  Email               String? @db.NVarChar(255)
+  Phone               String? @db.NVarChar(10)
+  Cfo_email           String? @db.NVarChar(Max)
+  Contact_name        String? @db.NVarChar(50)
+  Contact_phone       String? @db.NVarChar(10)
+  Ops_email           String? @db.NVarChar(Max)
+  SoftTalkTaxToken    String? @db.NVarChar(Max)
+  CorporationAutoLink String? @db.NVarChar(Max)
+}
+
+model Lkup_Country {
+  CountryID          Int     @id(map: "PK_Lkup_Country") @default(autoincrement())
+  CountryCode        String  @db.NVarChar(3)
+  CountryName        String  @unique(map: "IX_CountryName_Lkup_Country") @db.NVarChar(30)
+  CountryNameEnglish String? @db.NVarChar(50)
+  MultipleSelect     Int     @default(0, map: "DF_Lkup_Country_MultipleSelect")
+
+  @@index([CountryNameEnglish], map: "IX_CountryNameEnglish_Lkup_Country")
+  @@index([MultipleSelect], map: "IX_MultipleSelect_Lkup_Country")
+}
+
+model Lkup_CreaditCard {
+  CardID   Int    @id(map: "PK_Lkup_CreaditCard") @default(autoincrement())
+  CardName String @unique(map: "IX_CardName_Lkup_CreaditCard") @db.NVarChar(30)
+  CardCode Int    @unique(map: "IX_CardCode_Lkup_CreaditCard")
+}
+
+model Lkup_EmployeesType {
+  TypeID   Int    @id(map: "PK_Lkup_EmployeesType") @default(autoincrement())
+  TypeName String @unique(map: "IX_TypeName_Lkup_EmployeesType") @db.NVarChar(50)
+}
+
+model Lkup_Language {
+  LanguageID   Int    @id(map: "PK_Lkup_Language") @default(autoincrement())
+  LanguageName String @unique(map: "IX_LanguageName_Lkup_Language") @db.NVarChar(50)
+}
+
+model Lkup_PaySlip {
+  PaySlipCode       Int     @id(map: "PK_Lkup_PaySlip") @default(autoincrement())
+  PaySlipName       String? @unique(map: "IX_PaySlipName_Lkup_PaySlip") @db.NVarChar(30)
+  PaySlipNameSource String? @db.NVarChar(50)
+  IsTytle           Boolean
+}
+
+model Lkup_Sector {
+  SectorID   Int     @id(map: "PK_Lkup_Sector") @default(autoincrement())
+  SectorCode Int?    @unique(map: "IX_SectorCode_Lkup_Sector") @db.TinyInt
+  SectorName String? @unique(map: "IX_SectorName_Lkup_Sector") @db.NVarChar(50)
+  // SectorCode Int?    @map("126SectorCode") @db.TinyInt
+}
+
+model Lkup_SocialSecuritySector {
+  SocialSecurityID   Int    @id(map: "PK_SocialSecurityID_Lkup_SocialSecuritySector") @default(autoincrement())
+  SocialSecurityCode Int
+  SocialSecurityName String @db.NVarChar(100)
+
+  @@index([SocialSecurityCode], map: "IX_SocialSecurityCode_Lkup_SocialSecuritySector")
+}
+
+model Lkup_street {
+  StrretID      Int     @id(map: "PK_StrretID_Lkup_street") @default(autoincrement())
+  StreetName    String? @db.NVarChar(29)
+  StreetCode    Int?
+  Citycode      Int?
+  StreetNameEng String? @db.NVarChar(29)
+
+  @@index([Citycode], map: "IX_Citycode_Lkup_street")
+  @@index([StreetCode], map: "IX_StreetCode_Lkup_street")
+  @@index([StreetName], map: "IX_StreetName_Lkup_street")
+}
+
+model PensionDetail {
+  PensionDetailID          Int    @id(map: "PK_PensionDetailID_PensionDetail") @default(autoincrement())
+  TypePension              Int?
+  StartYearPension         Int?
+  EmployerRate             Float?
+  EmployeeRate             Float?
+  EmployerCompensationRate Float?
+  TotalPensionRate         Float?
+  AvarageSalaryPension     Float?
+  Deposit                  Float?
+
+  @@index([StartYearPension], map: "IX_StartYearPension_PensionDetail")
+  @@index([TypePension], map: "IX_TypePension_PensionDetail")
+}
+
+model Products {
+  ProductsId                        String                              @id(map: "PK_ProductsId") @default("newid()", map: "DF__Products__Produc__6BAEFA67") @db.NVarChar(36)
+  ProductName                       String                              @db.NVarChar(Max)
+  ProductDescription                String?                             @db.NVarChar(Max)
+  CompaniesProducts                 CompaniesProducts[]
+  CompaniesProductsExpireDates      CompaniesProductsExpireDates[]
+  CompaniesUsersProductsExpireDates CompaniesUsersProductsExpireDates[]
+}
+
+model Rank {
+  RankID     Int     @id(map: "PK_RankID_Rank") @default(autoincrement())
+  SectorCode Int?    @db.TinyInt
+  RankYear   Int?
+  RankMonth  Int?
+  RankCode   Int?
+  RankName   String? @db.NVarChar(50)
+  Salary     Float?
+  RankNumber Int?    @db.TinyInt
+
+  @@index([RankCode], map: "IX_RankCode_Rank")
+  @@index([RankMonth], map: "IX_RankMonth_Rank")
+  @@index([RankName], map: "IX_RankName_Rank")
+  @@index([RankYear], map: "IX_RankYear_Rank")
+  @@index([SectorCode], map: "IX_SectorCode_Rank")
+}
+
+model RecoveryDefinition {
+  RecoveryDefinitionID          Int                             @id(map: "PK_RecoveryDefinitionID_RecoveryDefinition") @default(autoincrement())
+  RecoveryDefinitionName        String?                         @db.NVarChar(50)
+  RecoveryYear                  String?                         @db.NVarChar(50)
+  RecoveryDefinitionDetails     RecoveryDefinitionDetails[]
+  RecoveryDefinitionRateDetails RecoveryDefinitionRateDetails[]
+
+  @@index([RecoveryDefinitionName], map: "IX_RecoveryDefinitionName_RecoveryDefinition")
+  @@index([RecoveryYear], map: "IX_RecoveryYear_RecoveryDefinition")
+}
+
+model RecoveryDefinitionDetails {
+  RewardRecoveryVectorID  Int                 @id(map: "PK_RewardRecoveryVectorID_RecoveryDefinitionDetails") @default(autoincrement())
+  RecoveryDefinitionID    Int?
+  StartYearRewardRecovery Float?              @db.Real
+  EndYearRewardRecovery   Float?              @db.Real
+  RecoveryDayQuantity     Int?
+  RecoveryYearDescription String?             @db.NVarChar(50)
+  RecoveryDefinition      RecoveryDefinition? @relation(fields: [RecoveryDefinitionID], references: [RecoveryDefinitionID], onDelete: NoAction, onUpdate: NoAction, map: "FK_RecoveryDefinitionDetails_RecoveryDefinition")
+
+  @@index([EndYearRewardRecovery], map: "IX_EndYearRewardRecovery_RecoveryDefinitionDetails")
+  @@index([RecoveryDefinitionID], map: "IX_RecoveryDefinitionID_RecoveryDefinitionDetails")
+  @@index([StartYearRewardRecovery], map: "IX_StartYearRewardRecovery_RecoveryDefinitionDetails")
+}
+
+model RecoveryDefinitionRateDetails {
+  RecoveryRewardID         Int                 @id(map: "PK_RecoveryRewardID_RecoveryDefinitionRateDetails")
+  RecoveryDefinitionID     Int?
+  RewardYearMonth          DateTime?           @db.DateTime
+  RecoveryRewardRatePerDay Float?              @db.Real
+  RecoveryDefinition       RecoveryDefinition? @relation(fields: [RecoveryDefinitionID], references: [RecoveryDefinitionID], onDelete: NoAction, onUpdate: NoAction, map: "FK_RecoveryDefinitionRateDetails_RecoveryDefinition")
+
+  @@index([RecoveryDefinitionID], map: "IX_RecoveryDefinitionID_RecoveryDefinitionRateDetails")
+  @@index([RecoveryRewardID], map: "IX_RecoveryDefinitionRateDetails")
+  @@index([RewardYearMonth], map: "IX_RewardYearMonth_RecoveryDefinitionRateDetails_1")
+}
+
+model ReportDefinitions {
+  ReportID    Int     @id(map: "PK_ReportID_ReportDefinitions") @default(autoincrement())
+  ReportName  String? @db.NVarChar(50)
+  OrderBy     Int?    @db.SmallInt
+  FieldName   String? @db.NVarChar(50)
+  Caption     String? @db.NVarChar(50)
+  Color       Int?
+  Background  Int?
+  ColumnWidth Float?  @db.Real
+  FontStyle   String? @db.NVarChar(50)
+  FontSize    Int?    @db.SmallInt
+  ReportTitle String? @db.NVarChar(50)
+  IsSum       Boolean
+  ColorIndex  Int?
+
+  @@unique([ReportName, FieldName], map: "IX_ReportNameVerFieldNameReportDefinitions")
+  @@index([FieldName], map: "IX_FieldName_ReportDefinitions")
+  @@index([ReportName], map: "IX_ReportName_ReportDefinitions")
+}
+
+model RewardRecoveryRate {
+  RecoveryRewardID         Int    @id(map: "PK_RecoveryRewardID_RewardRecoveryRate") @default(autoincrement())
+  RewardYear               Int?
+  RecoveryRewardRatePerDay Float? @db.Real
+
+  @@index([RewardYear], map: "IX_RewardYear_RewardRecoveryRate")
+}
+
+model RewardRecoveryVector {
+  RewardRecoveryVectorID  Int    @id(map: "PK_RewardRecoveryVectorID_RewardRecoveryVector") @default(autoincrement())
+  StartYearRewardRecovery Float? @db.Real
+  EndYearRewardRecovery   Float? @db.Real
+  RecoveryDayQuantity     Int?
+
+  @@index([EndYearRewardRecovery], map: "IX_EndYearRewardRecovery_RewardRecoveryVector")
+  @@index([StartYearRewardRecovery], map: "IX_StartYearRewardRecovery_RewardRecoveryVector")
+}
+
+model RewardSickVector {
+  RewardSickVectorID  Int    @id(map: "PK_RewardSickVectorID_RewardSickVector")
+  StartYearRewardSick Int?   @db.SmallInt
+  EndYearRewardSick   Int?   @db.SmallInt
+  SickDayQuantity     Float?
+
+  @@index([EndYearRewardSick], map: "IX_EndYearRewardSick_RewardSickVector")
+  @@index([StartYearRewardSick], map: "IX_StartYearRewardSick_RewardSickVector")
+}
+
+model RewardVacationVector {
+  RewardVocationVectorID   Int    @id(map: "PK_RewardVocationVectorID_RewardVacationVector") @default(autoincrement())
+  StartYearRewardVocation  Float? @db.Real
+  EndYearRewardVocation    Float? @db.Real
+  VocationDayQuantity6days Int?
+  VocationDayQuantity5days Int?
+
+  @@index([EndYearRewardVocation], map: "IX_EndYearRewardVocation_RewardVacationVector")
+  @@index([StartYearRewardVocation], map: "IX_StartYearRewardVocation_RewardVacationVector")
+}
+
+model SickDefinition {
+  SickDefinitionID     Int                    @id(map: "PK_SickDefinitionID_SickDefinition")
+  SickDescription      String?                @unique(map: "IX_SickDescription_SickDefinition") @db.NVarChar(50)
+  SickDefinitionDetail SickDefinitionDetail[]
+}
+
+model SickDefinitionDetail {
+  RewardSickVectorID    Int            @id(map: "PK_RewardSickVectorID_SickDefinitionDetail") @default(autoincrement())
+  SickDefinitionID      Int
+  StartYearRewardSick   Int?           @db.SmallInt
+  EndYearRewardSick     Int?           @db.SmallInt
+  SickDayQuantity       Float?
+  SocialYearDescription String?        @db.NVarChar(50)
+  SickDefinition        SickDefinition @relation(fields: [SickDefinitionID], references: [SickDefinitionID], onUpdate: NoAction, map: "FK_SickDefinitionDetail_SickDefinition")
+
+  @@index([EndYearRewardSick], map: "IX_EndYearRewardSick_SickDefinitionDetail")
+  @@index([SickDefinitionID], map: "IX_SickDefinitionID_SickDefinitionDetail")
+  @@index([StartYearRewardSick], map: "IX_StartYearRewardSick_SickDefinitionDetail")
+}
+
+model SocialSecurity {
+  SocialSecurityID          Int                    @id(map: "PK_SocialSecurityID_SocialSecurity")
+  SocialSecurityYear        Int
+  SocialSecurityMonth       Int
+  CurrentSocialSecurity     Boolean
+  MinAccountTotalForDivuach Int?
+  SocialSecurityDetile      SocialSecurityDetile[]
+
+  @@index([SocialSecurityMonth], map: "IX_SocialSecurityMonth_SocialSecurity")
+  @@index([SocialSecurityYear], map: "IX_SocialSecurityYear_SocialSecurity")
+}
+
+model SocialSecurityDetile {
+  SocialSecurityDetailID           Int            @id(map: "PK_SocialSecurityDetailID_SocialSecurityDetile") @default(autoincrement())
+  SocialSecurityID                 Int
+  SocialYear                       Int
+  SocialMonth                      Int
+  Sector                           Int            @db.TinyInt
+  SocialSecurityCode               Int
+  AverageSalary                    Float?
+  MinNationalInsByMony             Float?         @db.Real
+  MaxNationalInsByMony             Float?         @db.Real
+  MinDeductionNationalInsByMony    Float?         @db.Real
+  MinNationalInsByEmployee         Float?         @db.Real
+  MaxNationalInsByEmployee         Float?         @db.Real
+  MinNationalInsByEmployer         Float?         @db.Real
+  MaxNationalInsByEmployer         Float?         @db.Real
+  MaxNationalInsByMonyEmployee     Float?
+  AverageEmbodiment                Float?         @db.Real
+  DeductionMax                     Float?
+  DeductionPercent                 Float?         @db.Real
+  CreditPoint                      Float?         @db.Real
+  FactorToReduction                Float?         @db.Real
+  MinHoursToPay                    Int?
+  MinimumPayFor5Day                Float?
+  MinimumPayFor6Day                Float?
+  MaxPrecentReduction              Float?
+  hourPerDayfor5                   Float?
+  hourPerDayfor6                   Int?
+  hourInfridayDay                  Float?
+  TaxPrecent                       Float?
+  EmployerTax                      Float?         @db.Real
+  DiscountInTaxInEilat             Float?         @db.Real
+  TaxUnitNumber                    Float?         @db.Real
+  FundPercentConstruction          Float?
+  Hour100                          Float?
+  Hour125                          Float?
+  Hour150                          Float?
+  Hour175                          Float?
+  Hour200                          Float?
+  CreditCardMan                    Float?         @db.Real
+  CreditCardWoman                  Float?         @db.Real
+  CreditCardChild                  Float?         @db.Real
+  CreditCardBaby                   Float?         @db.Real
+  CreditCardInAddition             Float?         @db.Real
+  CreditCardLackMobilityChild      Float?         @db.Real
+  CreditCardImmigrant18            Float?         @db.Real
+  ControlingShareholder            Boolean
+  HealthInsuranceEmployeeLow       Float?         @db.Real
+  HealthInsuranceEmployeeAbove     Float?         @db.Real
+  HealthInsuranceEmployerLow       Float?         @db.Real
+  HealthInsuranceEmployerAbove     Float?         @db.Real
+  ValueOfVehicleUseHibberdDiscount Float?         @db.Real
+  Deposit                          Float?         @db.Real
+  ValueOfMobileUse                 Float?         @db.Real
+  PensionCeiling                   Float?
+  PensionCredit                    Float?
+  DepositEmployerPrecent           Float?         @db.Real
+  DepositEmployeePrecent           Float?         @db.Real
+  TotalHourPerWeek                 Float?
+  CreditCardAdultChild             Float?         @db.Real
+  CreditCardChild1_5               Float?         @db.Real
+  DepositEmployeePrecentExecption  Float?         @db.Real
+  SocialSecurity                   SocialSecurity @relation(fields: [SocialSecurityID], references: [SocialSecurityID], onUpdate: NoAction, map: "FK_SocialSecurityDetile_SocialSecurity")
+
+  @@index([ControlingShareholder], map: "IX_ControlingShareholder_SocialSecurityDetile")
+  @@index([Sector], map: "IX_Sector_SocialSecurityDetile")
+  @@index([SocialMonth], map: "IX_SocialMonth_SocialSecurityDetile")
+  @@index([SocialSecurityCode], map: "IX_SocialSecurityCode_SocialSecurityDetile")
+  @@index([SocialSecurityID], map: "IX_SocialSecurityID_SocialSecurityDetile")
+  @@index([SocialYear], map: "IX_SocialYear_SocialSecurityDetile")
+}
+
+model sysdiagrams {
+  name         String @db.NVarChar(128)
+  principal_id Int
+  diagram_id   Int    @id(map: "PK__sysdiagr__C2B05B616852F12B") @default(autoincrement())
+  version      Int?
+  definition   Bytes?
+
+  @@unique([principal_id, name], map: "UK_principal_name")
+}
+
+model SystemDefinition {
+  SystemDefinitionId String    @id(map: "PK_SystemDefinition") @default("newid()", map: "DF__SystemDef__Syste__45544755") @db.NVarChar(36)
+  CreatedAt          DateTime? @default(now(), map: "DF__SystemDef__Creat__46486B8E") @db.DateTime
+  FieldDescription   String?   @db.NVarChar(Max)
+  FieldValue         String?   @db.NVarChar(Max)
+}
+
+model SystemMaintenanc {
+  SystemMaintenancID Int     @id(map: "PK_SystemMaintenancID_SystemMaintenanc") @default(autoincrement())
+  UserMsg            String  @db.NVarChar(255)
+  LogOutFrequency    Int
+  SystemMaintenanc   Boolean
+}
+
+model TaxStepDetile {
+  TaxStepDetileID Int      @id(map: "PK_TaxStepDetileID_TaxStepDetile") @default(autoincrement())
+  TaxStapID       Int
+  TaxYear         Int
+  TaxMonth        Int
+  StepNumber      Int?
+  TaxStap         Int?
+  TaxStapPercent  Float?   @db.Real
+  TaxSteps        TaxSteps @relation(fields: [TaxStapID], references: [TaxStapID], onUpdate: NoAction, map: "FK_TaxStepDetile_TaxSteps")
+
+  @@index([StepNumber], map: "IX_StepNumber_TaxStepDetile")
+  @@index([TaxMonth], map: "IX_TaxMonth_TaxStepDetile")
+  @@index([TaxStapID], map: "IX_TaxStapID_TaxStepDetile")
+  @@index([TaxYear], map: "IX_TaxYear_TaxStepDetile")
+}
+
+model TaxSteps {
+  TaxStapID      Int             @id(map: "PK_TaxStapID_TaxSteps") @default(autoincrement())
+  TaxMonth       Int
+  TaxYear        Int
+  CurrentTaxStep Boolean
+  TaxStepDetile  TaxStepDetile[]
+
+  @@index([TaxMonth], map: "IX_TaxMonth_TaxSteps")
+  @@index([TaxYear], map: "IX_TaxYear_TaxSteps")
+}
+
+model UnionFee {
+  ID             Int              @id(map: "PK_ID_UnionFee")
+  UnionCode      Int              @unique(map: "IX_UnionCode_UnionFee")
+  UnionName      String           @unique(map: "IX_UnionName_UnionFee") @db.NVarChar(100)
+  UnionFeeDetile UnionFeeDetile[]
+}
+
+model UnionFeeDetile {
+  ID                Int      @id(map: "PK_ID_UnionFeeDetile") @default(autoincrement())
+  UnionCode         Int
+  SocialYear        Int
+  SocialMonth       Int
+  FeePercentage_No  Float?
+  FeePercentage_Yes Float?
+  MaxFee            Float?   @db.Real
+  MaxAdminFee       Float?   @db.Real
+  UnionFee          UnionFee @relation(fields: [UnionCode], references: [UnionCode], onUpdate: NoAction, map: "FK_UnionFeeDetile_UnionFee")
+
+  @@index([SocialMonth], map: "IX_SocialMonth_UnionFeeDetile")
+  @@index([SocialYear], map: "IX_SocialYear_UnionFeeDetile")
+  @@index([UnionCode], map: "IX_UnionCode_UnionFeeDetile")
+}
+
+model VacationDefinitionDetails {
+  VacationlDefinitionDetaillID Int                  @id(map: "PK_VacationlDefinitionDetaillID_VacationDefinitionDetails") @default(autoincrement())
+  VacationlDefinitionID        Int?
+  StartMonthReward             Float?               @db.Real
+  EndMonthrReward              Float?               @db.Real
+  DayQuantity6days             Int?
+  DayQuantity5days             Int?
+  SocialYearDescription        String?              @db.NVarChar(50)
+  DayQuantity                  Int?
+  VacationlDefinition          VacationlDefinition? @relation(fields: [VacationlDefinitionID], references: [VacationlDefinitionID], onDelete: NoAction, onUpdate: NoAction, map: "FK_VacationDefinitionDetails_VacationlDefinition")
+
+  @@index([EndMonthrReward], map: "IX_EndMonthrReward_VacationDefinitionDetails")
+  @@index([StartMonthReward], map: "IX_StartMonthReward_VacationDefinitionDetails")
+  @@index([VacationlDefinitionID], map: "IX_VacationlDefinitionID_VacationDefinitionDetails")
+}
+
+model VacationlDefinition {
+  VacationlDefinitionID     Int                         @id(map: "PK_VacationlDefinitionID_VacationlDefinition") @default(autoincrement())
+  VacationlDefinitionName   String                      @unique(map: "IX_VacationlDefinitionName_VacationlDefinition") @db.NVarChar(50)
+  VacationDefinitionDetails VacationDefinitionDetails[]
+}
+
+model ValueOfVehicleUse {
+  ValueOfVehicleUselID Int    @id(map: "PK_ValueOfVehicleUselID_ValueOfVehicleUse") @default(autoincrement())
+  Year                 Int?
+  Month                Int?
+  GroupOfVehicle       Int
+  Value                Float? @db.Real
+
+  @@index([GroupOfVehicle], map: "IX_GroupOfVehicle_ValueOfVehicleUse")
+  @@index([Month], map: "IX_Month_ValueOfVehicleUse")
+  @@index([Year], map: "IX_Year_ValueOfVehicleUse")
+}
+
+model ValueOfVehicleUseByDetile {
+  ID             Int       @id(map: "PK_ID_ValueOfVehicleUseByDetile") @default(autoincrement())
+  Year           Float
+  RegistryYear   Int
+  VehicleCode    Int       @db.TinyInt
+  ProductCode    Int
+  ProductName    String    @db.NVarChar(50)
+  ModelCode      Int
+  ModelName      String    @db.NVarChar(50)
+  FuelType       Int?      @db.TinyInt
+  CommercialName String?   @db.NVarChar(50)
+  Automatic      Int?      @db.TinyInt
+  Hybrid         Int?      @db.TinyInt
+  GreenGrade     Int?
+  PolutionGrade  Int?      @db.SmallInt
+  EngineVolume   Int?
+  Weight         Float?
+  BeginDate      DateTime? @db.DateTime
+  ListPrice      Float?    @db.Real
+  AjustedPrice   Float?    @db.Real
+  Value          Float?    @db.Real
+
+  @@index([ModelCode], map: "IX_ModelCode_ValueOfVehicleUseByDetile")
+  @@index([ProductCode], map: "IX_ProductCode_ValueOfVehicleUseByDetile")
+  @@index([RegistryYear], map: "IX_RegistryYear_ValueOfVehicleUseByDetile")
+  @@index([VehicleCode], map: "IX_VehicleCode_ValueOfVehicleUseByDetile")
+  @@index([Year], map: "IX_Year_ValueOfVehicleUseByDetile")
+}

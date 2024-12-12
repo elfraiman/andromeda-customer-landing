@@ -1,6 +1,6 @@
 "use client";
-
-import { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactNode, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -14,13 +14,18 @@ const theme = createTheme({
     },
 });
 
+
 export default function ClientProviders({ children }: { children: ReactNode }) {
+    const [queryClient] = useState(() => new QueryClient());
+
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                {children}
-            </ThemeProvider>
-        </LocalizationProvider>
+        <QueryClientProvider client={queryClient} >
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    {children}
+                </ThemeProvider>
+            </LocalizationProvider>
+        </QueryClientProvider>
     );
 }

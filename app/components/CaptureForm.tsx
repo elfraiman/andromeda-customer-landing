@@ -1,13 +1,15 @@
 "use client";
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { TextField, Box, Grid, InputAdornment } from "@mui/material";
-import { toast } from "react-toastify";
-import { Button, Spinner } from "react-bootstrap";
-import Image from "next/image";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs, { Dayjs } from "dayjs";
-import styles from "./CaptureForm.module.scss";
 import username from "@/img/svg/username.svg";
+import { Companies } from "@/prisma/generated/base";
+import { Box, InputAdornment, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Unstable_Grid2";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { Dayjs } from "dayjs";
+import Image from "next/image";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { Button, Spinner } from "react-bootstrap";
+import { toast } from "react-toastify";
+import styles from "./CaptureForm.module.scss";
 import LanguageRestrictedInput from "./LanguageRestrictedInput";
 
 // Form types
@@ -19,10 +21,10 @@ interface FormData {
     personId: string; // Changed to string for validation
     phoneNumber: string; // Changed to string for validation
     email: string;
-    dateOfBirth: Dayjs | null;
+    dateOfBirth: Dayjs | null | string;
 }
 
-const CaptureForm: React.FC = () => {
+const CaptureForm = (props: { companyData: Companies }) => {
     const [formData, setFormData] = useState<FormData>({
         firstName: "",
         lastName: "",
@@ -82,7 +84,7 @@ const CaptureForm: React.FC = () => {
         }));
 
         const error = validateField("dateOfBirth", date);
-        setErrors((prev: any) => ({
+        setErrors((prev: Partial<FormData>) => ({
             ...prev,
             dateOfBirth: error,
         }));
@@ -126,12 +128,12 @@ const CaptureForm: React.FC = () => {
                 flexDirection: "column",
             }}
         >
-            <h1 className={styles.title}>היי, סססס טוב לראות אותך!</h1>
+            <h1 className={styles.title}>היי, {props?.companyData?.CompanyName} טוב לראות אותך!</h1>
             <p className={styles.subTitle}>מלאו את הפרטים הבאים כדי לרשום לקוח</p>
 
             <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                <Grid2 container spacing={2}>
+                    <Grid2 xs={12} sm={6}>
                         <TextField
                             name="firstName"
                             placeholder="שם פרטי בלועזית"
@@ -150,8 +152,9 @@ const CaptureForm: React.FC = () => {
                                 ),
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+
+                    <Grid2 xs={12} sm={6}>
                         <TextField
                             name="lastName"
                             placeholder="שם משפחה בלועזית"
@@ -170,8 +173,9 @@ const CaptureForm: React.FC = () => {
                                 ),
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+
+                    <Grid2 xs={12} sm={6}>
                         <LanguageRestrictedInput
                             name="firstNameHeb"
                             icon={username}
@@ -181,8 +185,9 @@ const CaptureForm: React.FC = () => {
                             showError={!!errors.firstNameHeb}
                             onChange={handleChange}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+
+                    <Grid2 xs={12} sm={6}>
                         <LanguageRestrictedInput
                             name="lastNameHeb"
                             icon={username}
@@ -192,9 +197,9 @@ const CaptureForm: React.FC = () => {
                             showError={!!errors.lastNameHeb}
                             onChange={handleChange}
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid2 xs={12} sm={6}>
                         <TextField
                             name="personId"
                             type="number"
@@ -214,8 +219,8 @@ const CaptureForm: React.FC = () => {
                                 ),
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+                    <Grid2 xs={12} sm={6}>
                         <TextField
                             name="phoneNumber"
                             type="number"
@@ -235,8 +240,8 @@ const CaptureForm: React.FC = () => {
                                 ),
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+                    <Grid2 xs={12} sm={6}>
                         <TextField
                             name="email"
                             placeholder="אימייל"
@@ -255,8 +260,8 @@ const CaptureForm: React.FC = () => {
                                 ),
                             }}
                         />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
+                    </Grid2>
+                    <Grid2 xs={12} sm={6}>
                         <DatePicker
                             label="תאריך לידה"
                             value={formData.dateOfBirth}
@@ -270,8 +275,8 @@ const CaptureForm: React.FC = () => {
                                 },
                             }}
                         />
-                    </Grid>
-                </Grid>
+                    </Grid2>
+                </Grid2>
 
                 <Box mt={3}>
                     <Button type="submit" disabled={loading || hasErrors} className={styles.loginBtn}>
@@ -280,6 +285,7 @@ const CaptureForm: React.FC = () => {
                 </Box>
             </form>
         </Box>
+
     );
 };
 
