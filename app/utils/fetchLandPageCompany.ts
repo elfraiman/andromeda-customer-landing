@@ -33,7 +33,7 @@ export const fetchLandings = async (landPageRowId: string) => {
       });
     }
 
-    return landPage?.Companies;
+    return { companyData: landPage?.Companies, landPageData: landPage }
   } catch (error) {
     console.error('Error fetching landing page or company:', error);
     return null;

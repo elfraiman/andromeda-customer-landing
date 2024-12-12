@@ -3,31 +3,39 @@ import logo from '@/img/svg/logoAndromedaColor.svg';
 import { Box, Paper } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2'; // Import Grid2
 import Image from 'next/image';
-import { Companies, Products } from '../../prisma/generated/base/index';
+import { Companies, LandPages, Products } from '../../prisma/generated/base/index';
 import CaptureForm from "../components/CaptureForm";
 import RtlMaterialCont from '../utils/RtlMaterialCont';
 import styles from "./landingPage.module.scss";
-import { useLandPage } from '../context/LandPageContext';
+import { useLandingPageData, useLandPage } from '../context/LandPageContext';
 import { useEffect } from 'react';
 import { useProducts } from '../context/ProductsContext';
+import { useCompany } from '../context/CompanyContext';
 
 interface LandingPageProps {
     landPageRowId: string;
     companyData: Companies;
     products: Products[];
+    landPageData: LandPages;
 }
 
 function LandingPage(props: LandingPageProps) {
     const { setLandPageRowId } = useLandPage();
+    const { setLandingPageData } = useLandingPageData();
+    const { setCompanyData } = useCompany();
     const { setProducts } = useProducts();
 
+    // Set all the data for the context
+    // to be used across the app in the global state
+    //
     useEffect(() => {
-        // Set the landPageRowId from params when the page loads
-        // to the context global state so we can re-use this in other components if needed.
+        // Set the context state for company, landPageRowId and products
         // 
+        setCompanyData(props.companyData);
         setLandPageRowId(props.landPageRowId);
         setProducts(props.products);
-    }, [props.landPageRowId, setLandPageRowId, props.products, setProducts]);
+        setLandingPageData(props.landPageData);
+    }, [props.landPageRowId, setLandPageRowId, props.products, setProducts, props.companyData, setCompanyData, props.landPageData, setLandingPageData]);
 
     return (
         <Grid2 container className={styles.formLogin} >

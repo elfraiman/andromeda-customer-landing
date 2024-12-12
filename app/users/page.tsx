@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-// /app/users/page.js
+
 export default function UsersPage() {
     return (
         <Box>

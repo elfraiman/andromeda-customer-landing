@@ -1,0 +1,35 @@
+@import "../../globalStyles/index.scss";
+
+.listPage {
+    display: flex;
+    justify-content: center;
+    background: url("../../../img/logoBg.png") top center no-repeat white;
+    background-size: 100%;
+    min-height: 100vh;
+
+    .grid {
+        margin-top: 36px;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .logoLogin {
+        margin: 0 0 26px 0;
+        width: 150px;
+    }
+}
+
+.Btn {
+    border: none;
+    border-radius: 20px;
+    background: $blueColor;
+    color: white;
+    height: 50px;
+    font-size: 22px;
+    width: 280px;
+    margin-top: 16px;
+
+    &:hover {
+        background: $greenTidar;
+    }
+}

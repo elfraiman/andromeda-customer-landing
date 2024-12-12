@@ -7,6 +7,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ProductsProvider } from './context/ProductsContext';
 import { LandPageProvider } from './context/LandPageContext';
+import { CompanyDataProvider } from './context/CompanyContext';
 
 const theme = createTheme({
     palette: {
@@ -26,8 +27,10 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
                 <ThemeProvider theme={theme}>
                     <LandPageProvider>
                         <ProductsProvider>
-                            <CssBaseline />
-                            {children}
+                            <CompanyDataProvider>
+                                <CssBaseline />
+                                {children}
+                            </CompanyDataProvider>
                         </ProductsProvider>
                     </LandPageProvider>
                 </ThemeProvider>
