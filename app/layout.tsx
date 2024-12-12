@@ -2,6 +2,7 @@ import "./globals.css";
 import { ReactNode } from 'react';
 import ClientProviders from "./ClientProviders";
 import { LandPageProvider } from "./context/LandPageContext";
+import { ProductsProvider } from "./context/ProductsContext";
 
 
 
@@ -16,7 +17,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <LandPageProvider>
           <ClientProviders>
-            {children}
+            <ProductsProvider>
+              {children}
+            </ProductsProvider>
           </ClientProviders>
         </LandPageProvider>
       </body>

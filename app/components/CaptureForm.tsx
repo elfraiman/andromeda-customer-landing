@@ -1,16 +1,18 @@
 "use client";
 import username from "@/img/svg/username.svg";
 import { Companies } from "@/prisma/generated/base";
-import { Box, InputAdornment, TextField } from "@mui/material";
+import { Box, Checkbox, CircularProgress, FormControlLabel, InputAdornment, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import Image from "next/image";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { toast } from "react-toastify";
 import styles from "./CaptureForm.module.scss";
 import LanguageRestrictedInput from "./LanguageRestrictedInput";
+import { useProducts } from "../context/ProductsContext";
+import { Tooltip } from "@mui/material";
 
 // Form types
 interface FormData {
@@ -18,13 +20,15 @@ interface FormData {
     lastName: string;
     firstNameHeb: string;
     lastNameHeb: string;
-    personId: string; // Changed to string for validation
-    phoneNumber: string; // Changed to string for validation
+    personId: string;
+    phoneNumber: string;
     email: string;
     dateOfBirth: Dayjs | null | string;
+    selectedProducts: Record<string, boolean>;
 }
 
 const CaptureForm = (props: { companyData: Companies }) => {
+    const { filteredProducts } = useProducts();
     const [formData, setFormData] = useState<FormData>({
         firstName: "",
         lastName: "",
@@ -34,6 +38,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
         phoneNumber: "",
         email: "",
         dateOfBirth: null,
+        selectedProducts: {},
     });
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -87,6 +92,31 @@ const CaptureForm = (props: { companyData: Companies }) => {
         setErrors((prev: Partial<FormData>) => ({
             ...prev,
             dateOfBirth: error,
+        }));
+    };
+    useEffect(() => {
+        if (filteredProducts.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                selectedProducts: filteredProducts.reduce(
+                    (acc, product) => ({
+                        ...acc,
+                        [product.ProductName]: prev.selectedProducts[product.ProductName] ?? true, // Preserve existing values or default to true
+                    }),
+                    {}
+                ),
+            }));
+        }
+    }, [filteredProducts]);
+
+
+    const handleProductChange = (productName: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            selectedProducts: {
+                ...prev.selectedProducts,
+                [productName]: !prev.selectedProducts[productName],
+            },
         }));
     };
 
@@ -220,6 +250,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                             }}
                         />
                     </Grid2>
+
                     <Grid2 xs={12} sm={6}>
                         <TextField
                             name="phoneNumber"
@@ -241,6 +272,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                             }}
                         />
                     </Grid2>
+
                     <Grid2 xs={12} sm={6}>
                         <TextField
                             name="email"
@@ -261,6 +293,7 @@ const CaptureForm = (props: { companyData: Companies }) => {
                             }}
                         />
                     </Grid2>
+
                     <Grid2 xs={12} sm={6}>
                         <DatePicker
                             label="תאריך לידה"
@@ -278,11 +311,40 @@ const CaptureForm = (props: { companyData: Companies }) => {
                     </Grid2>
                 </Grid2>
 
-                <Box mt={3}>
-                    <Button type="submit" disabled={loading || hasErrors} className={styles.loginBtn}>
-                        {loading ? <Spinner animation="border" variant="light" /> : "שליחה"}
-                    </Button>
+                {filteredProducts.length === 0 ? (
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : (<Box mt={3}>
+                    <h3>בחר מוצרים</h3>
+                    <Grid2 container spacing={3}>
+                        {filteredProducts.map((product) => (
+                            <Grid2 key={product.ProductName} xs={12} sm={6}>
+                                <Tooltip title={product.ProductDescription || "No description available"} arrow>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={formData.selectedProducts[product.ProductName] ?? false} // Default to false if undefined
+                                                onChange={() => handleProductChange(product.ProductName)}
+                                                color="primary"
+                                            />
+                                        }
+                                        label={product.ProductName}
+                                    />
+                                </Tooltip>
+                            </Grid2>
+                        ))}
+                    </Grid2>
+
+                    <Box>
+                        <Button type="submit" disabled={loading || hasErrors} className={styles.loginBtn}>
+                            {loading ? <Spinner animation="border" variant="light" /> : "שליחה"}
+                        </Button>
+                    </Box>
                 </Box>
+
+                )}
+
             </form>
         </Box>
 

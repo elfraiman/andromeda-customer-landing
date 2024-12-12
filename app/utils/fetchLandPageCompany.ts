@@ -1,4 +1,5 @@
 import { prismaGeneralDb } from '../db/dbMain';
+import { dateNowToServer } from './utilityFunctions';
 
 export const fetchProducts = async () => {
   try {
@@ -21,6 +22,13 @@ export const fetchLandings = async (landPageRowId: string) => {
         LandPageRowId: landPageRowId,
       },
     });
+
+    if (!landPage?.ViewDate) {
+      await prismaGeneralDb.landPages.update({
+        where: { LandPageRowId: landPageRowId },
+        data: { ViewDate: dateNowToServer() }
+      });
+    }
 
     const companyId = landPage?.CompanyID;
 

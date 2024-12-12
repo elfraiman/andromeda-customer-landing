@@ -9,16 +9,25 @@ import RtlMaterialCont from '../utils/RtlMaterialCont';
 import styles from "./landingPage.module.scss";
 import { useLandPage } from '../context/LandPageContext';
 import { useEffect } from 'react';
+import { useProducts } from '../context/ProductsContext';
 
-function Landing(props) {
+interface LandingPageProps {
+    landPageRowId: string;
+    companyData: Companies;
+    products: Products[];
+}
+
+function LandingPage(props: LandingPageProps) {
     const { setLandPageRowId } = useLandPage();
+    const { setProducts } = useProducts();
 
     useEffect(() => {
         // Set the landPageRowId from params when the page loads
         // to the context global state so we can re-use this in other components if needed.
         // 
         setLandPageRowId(props.landPageRowId);
-    }, [props.landPageRowId, setLandPageRowId]);
+        setProducts(props.products);
+    }, [props.landPageRowId, setLandPageRowId, props.products, setProducts]);
 
     return (
         <Grid2 container className={styles.formLogin} sx={{ height: '100vh' }}>
@@ -46,4 +55,4 @@ function Landing(props) {
     );
 }
 
-export default Landing;
+export default LandingPage;
