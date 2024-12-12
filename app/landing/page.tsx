@@ -30,7 +30,7 @@ function LandingPage(props: LandingPageProps) {
     }, [props.landPageRowId, setLandPageRowId, props.products, setProducts]);
 
     return (
-        <Grid2 container className={styles.formLogin} sx={{ height: '100vh' }}>
+        <Grid2 container className={styles.formLogin} >
             <Grid2
                 xs={12}
                 sm={8}

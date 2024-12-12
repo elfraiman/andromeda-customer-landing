@@ -18,6 +18,9 @@ export const fetchLandings = async (landPageRowId: string) => {
     }
 
     const landPage = await prismaGeneralDb.landPages.findUnique({
+      include: {
+        Companies: true
+      },
       where: {
         LandPageRowId: landPageRowId,
       },
@@ -30,20 +33,7 @@ export const fetchLandings = async (landPageRowId: string) => {
       });
     }
 
-    const companyId = landPage?.CompanyID;
-
-    if (!companyId) {
-      console.warn('CompanyID not found for the provided LandPageRowId.');
-      return null;
-    }
-
-    const company = await prismaGeneralDb.companies.findUnique({
-      where: {
-        CompanyID: companyId,
-      },
-    });
-
-    return company;
+    return landPage?.Companies;
   } catch (error) {
     console.error('Error fetching landing page or company:', error);
     return null;

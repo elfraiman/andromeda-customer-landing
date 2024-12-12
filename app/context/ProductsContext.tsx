@@ -10,11 +10,13 @@ const ProductsContext = createContext<{
 
 export const ProductsProvider = ({ children }: { children: React.ReactNode }) => {
     const [products, setProducts] = useState<Products[]>([]);
+    // ProductIds to display
+    //
     const productIdsToDisplay = [
         '00868615-E3A4-41EE-94E3-759BC1367891',
         '1024D7C8-F1CF-43ED-94AC-D10BC3DAA1CF',
         '765F8702-6492-41DA-9B16-C373413AABF6'
-    ]; // ProductIds to display
+    ];
 
     // Filter the products based on the ProductId
     //

@@ -16,7 +16,7 @@ const Home = async ({ params }: HomeProps) => {
   const findCompanyData = await fetchLandings(landPageRowId);
 
   if (!findCompanyData) {
-    return <h2>No company found for this ID</h2>;
+    return <h2 style={{ margin: 36, color: 'red' }}>לא נמצאה חברה</h2>;
   }
 
   return <LandingPage
